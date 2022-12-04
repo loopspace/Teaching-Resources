@@ -1,0 +1,529 @@
+\RequirePackage{luatex85}
+\documentclass{article}
+\thispagestyle{empty}
+\pagestyle{empty}
+
+%\usepackage{pgfmorepages}
+%\pgfpagesuselayout{2 on 1}[landscape]
+
+\usepackage[a5paper,landscape]{geometry}
+
+\usepackage{amsmath}
+
+\def\Instructions{%
+  \clearpage
+\paragraph{Instructions:}
+\begin{enumerate}
+\item Draw axes with \(x\) from \(0\) to \(6\) and \(y\) from \(0\) to \(6\).
+\item On your axes, \textbf{lightly} draw each of the following lines.
+\item After drawing all of the lines, start at the point where the \textbf{first} and \textbf{last} lines meet.
+\item From that point, redraw more heavily the first line until it meets the second line.
+(The set of lines reads \emph{across} and then \emph{down}.)
+\item Then redraw the second line from that point until it meets the third line.
+\item Continue this until you get to the last line.
+\item Redraw the last line until it meets the first line again.
+\end{enumerate}
+}
+
+\begin{document}
+
+\Instructions
+%M
+\begin{align*}
+y &= 6 x
+& y &= 6
+& y &= 12 - 3x
+& y &= 3 x - 6
+& y &= 6
+\\ y &= 36 - 6x
+& y &= 0
+& y &= 30 - 6x
+& y &= 3x - 9
+& y &= 2
+\\ y &= 9 - 3x
+& y &= 6x - 6
+& y &= 0
+\end{align*}
+
+%E
+\Instructions
+\begin{align*}
+x &= 0 &
+y &= 6 &
+x &= 4 &
+y &= 5 &
+x &= 1 &
+y &= 4 \\
+x &= 3 &
+y &= 3 &
+x &= 1 &
+y &= 1 &
+x &= 4 &
+y &= 0
+\end{align*}
+
+\Instructions
+
+% R
+\begin{enumerate}
+\renewcommand\theenumi{\Alph{enumi}}
+\item First outline:
+\begin{align*}
+x &= 0 &
+y &= 6 &
+y &= 9 - x &
+x &= 4 &
+y &= x &
+y &= 12 - 3x \\
+y &= 0 &
+y &= 9 - 3 x &
+y &= 3 &
+x &= 1 &
+y &= 0
+\end{align*}
+
+\item Second outline:
+\begin{align*}
+x &= 1 &
+y &= 5 &
+x &= 3 &
+y &= 4
+\end{align*}
+\end{enumerate}
+
+\Instructions
+%R
+\begin{enumerate}
+\renewcommand\theenumi{\Alph{enumi}}
+\item First outline:
+\begin{align*}
+x &= 0 &
+y &= 6 &
+y &= 9 - x &
+x &= 4 &
+y &= x &
+y &= 12 - 3x \\
+y &= 0 &
+y &= 9 - 3 x &
+y &= 3 &
+x &= 1 &
+y &= 0
+\end{align*}
+
+\item Second outline:
+\begin{align*}
+x &= 1 &
+y &= 5 &
+x &= 3 &
+y &= 4
+\end{align*}
+\end{enumerate}
+
+
+\Instructions
+%Y
+\begin{align*}
+x &= 2 &
+y &= -1.5x + 6 &
+x &= 6 &
+y &= -1.5x + 7.5 \\
+y &= 1.5 x &
+y &= 6 &
+y &= 1.5 x - 1.5 &
+x &= 3 &
+y &= 0
+\end{align*}
+
+\Instructions
+%C
+\begin{align*}
+y &= 0 &
+y &= -x + 1 &
+x &= 0 &
+y &= x + 5 &
+y &= 6 &
+y &= -x + 10 \\
+y &= x &
+y &= -x + 8 &
+y &= 5 &
+y &= x + 3 &
+x &= 1 \\
+y &= -x + 3 &
+y &= 1 &
+y &= x - 2 &
+y &= -x + 6 &
+y &= x - 4
+\end{align*}
+
+\Instructions
+%H
+\begin{align*}
+x &= 0 &
+y &= 6 &
+x &= 1 &
+y &= 4 &
+x &= 3 &
+y &= 6 \\
+x &= 4 &
+y &= 0 &
+x &= 3 &
+y &= 3 &
+x &= 1 &
+y &= 0
+\end{align*}
+
+%R
+\Instructions
+\begin{enumerate}
+\renewcommand\theenumi{\Alph{enumi}}
+\item First outline:
+\begin{align*}
+x &= 0 &
+y &= 6 &
+y &= 9 - x &
+x &= 4 &
+y &= x &
+y &= 12 - 3x \\
+y &= 0 &
+y &= 9 - 3 x &
+y &= 3 &
+x &= 1 &
+y &= 0
+\end{align*}
+
+\item Second outline:
+\begin{align*}
+x &= 1 &
+y &= 5 &
+x &= 3 &
+y &= 4
+\end{align*}
+\end{enumerate}
+
+%I
+\Instructions
+
+\begin{align*}
+x &= 1 &
+y &= 1 &
+x &= 2 &
+y &= 5 &
+x &= 1 &
+y &= 6 \\
+x &= 4 &
+y &= 5 &
+x &= 3 &
+y &= 1 &
+x &= 4 &
+y &= 0
+\end{align*}
+
+%S
+\Instructions
+
+\begin{align*}
+y &= x - 4 &
+y &= 0 &
+x &= 0 &
+y &= 1 &
+x &= 4 &
+y &= 3 &
+y &= - x + 4 &
+x &= 0 \\
+y &= x + 5 &
+y &= 6 &
+x &= 4 &
+y &= 5 &
+x &= 1 &
+y &= 4 &
+y &= -x + 8 &
+x &= 5
+\end{align*}
+
+%T
+\Instructions
+
+\begin{align*}
+x &= 2 &
+y &= 5 &
+x &= 0 &
+y &= 6 &
+x &= 5 &
+y &= 5 &
+x &= 3 &
+y &= 0
+\end{align*}
+
+%M
+\Instructions
+\begin{align*}
+y &= 6 x
+& y &= 6
+& y &= 12 - 3x
+& y &= 3 x - 6
+& y &= 6
+\\ y &= 36 - 6x
+& y &= 0
+& y &= 30 - 6x
+& y &= 3x - 9
+& y &= 2
+\\ y &= 9 - 3x
+& y &= 6x - 6
+& y &= 0
+\end{align*}
+
+%A
+\Instructions
+
+\begin{enumerate}
+\renewcommand\theenumi{\Alph{enumi}}
+\item First outline:
+\begin{align*}
+y &= 3x &
+y &= 6 &
+y &= -3x + 15 &
+y &= 0 \\
+y &= -3x + 12 &
+y &= 2 &
+y &= 3x - 3 &
+y &= 0
+\end{align*}
+
+\item Second outline:
+\begin{align*}
+y &= 3 &
+y &= 3x - 3 &
+y &= -3x + 12
+\end{align*}
+\end{enumerate}
+
+%S
+\Instructions
+
+\begin{align*}
+y &= x - 4 &
+y &= 0 &
+x &= 0 &
+y &= 1 &
+x &= 4 &
+y &= 3 &
+y &= - x + 4 &
+x &= 0 \\
+y &= x + 5 &
+y &= 6 &
+x &= 4 &
+y &= 5 &
+x &= 1 &
+y &= 4 &
+y &= -x + 8 &
+x &= 5
+\end{align*}
+
+%F
+\Instructions
+\begin{align*}
+x &= 0 &
+y &= 6 &
+x &= 4 &
+y &= 5 &
+x &= 1 &
+y &= 4 \\
+x &= 3 &
+y &= 3 &
+x &= 1 &
+y &= 0
+\end{align*}
+
+%R
+\Instructions
+\begin{enumerate}
+\renewcommand\theenumi{\Alph{enumi}}
+\item First outline:
+\begin{align*}
+x &= 0 &
+y &= 6 &
+y &= 9 - x &
+x &= 4 &
+y &= x &
+y &= 12 - 3x \\
+y &= 0 &
+y &= 9 - 3 x &
+y &= 3 &
+x &= 1 &
+y &= 0
+\end{align*}
+
+\item Second outline:
+\begin{align*}
+x &= 1 &
+y &= 5 &
+x &= 3 &
+y &= 4
+\end{align*}
+\end{enumerate}
+
+%O
+\Instructions
+\begin{enumerate}
+\renewcommand\theenumi{\Alph{enumi}}
+\item First outline:
+\begin{align*}
+y &= -x + 2 &
+x &= 1 &
+y &= x + 4 &
+y &= 6 \\
+y &= -x + 10 &
+x &= 5 &
+y &= x - 4 &
+y &= 0 &
+\end{align*}
+\item Second outline:
+\begin{align*}
+x &= 2 &
+y &= 5 &
+x &= 4 &
+y &= 1
+\end{align*}
+\end{enumerate}
+
+%M
+\Instructions
+\begin{align*}
+y &= 6 x
+& y &= 6
+& y &= 12 - 3x
+& y &= 3 x - 6
+& y &= 6
+\\ y &= 36 - 6x
+& y &= 0
+& y &= 30 - 6x
+& y &= 3x - 9
+& y &= 2
+\\ y &= 9 - 3x
+& y &= 6x - 6
+& y &= 0
+\end{align*}
+
+%F
+\Instructions
+\begin{align*}
+x &= 0 &
+y &= 6 &
+x &= 4 &
+y &= 5 &
+x &= 1 &
+y &= 4 \\
+x &= 3 &
+y &= 3 &
+x &= 1 &
+y &= 0
+\end{align*}
+
+
+%O
+\Instructions
+\begin{enumerate}
+\renewcommand\theenumi{\Alph{enumi}}
+\item First outline:
+\begin{align*}
+y &= -x + 2 &
+x &= 1 &
+y &= x + 4 &
+y &= 6 \\
+y &= -x + 10 &
+x &= 5 &
+y &= x - 4 &
+y &= 0 &
+\end{align*}
+\item Second outline:
+\begin{align*}
+x &= 2 &
+y &= 5 &
+x &= 4 &
+y &= 1
+\end{align*}
+\end{enumerate}
+
+%R
+\Instructions
+\begin{enumerate}
+\renewcommand\theenumi{\Alph{enumi}}
+\item First outline:
+\begin{align*}
+x &= 0 &
+y &= 6 &
+y &= 9 - x &
+x &= 4 &
+y &= x &
+y &= 12 - 3x \\
+y &= 0 &
+y &= 9 - 3 x &
+y &= 3 &
+x &= 1 &
+y &= 0
+\end{align*}
+
+\item Second outline:
+\begin{align*}
+x &= 1 &
+y &= 5 &
+x &= 3 &
+y &= 4
+\end{align*}
+\end{enumerate}
+
+%M
+\Instructions
+\begin{align*}
+y &= 6 x
+& y &= 6
+& y &= 12 - 3x
+& y &= 3 x - 6
+& y &= 6
+\\ y &= 36 - 6x
+& y &= 0
+& y &= 30 - 6x
+& y &= 3x - 9
+& y &= 2
+\\ y &= 9 - 3x
+& y &= 6x - 6
+& y &= 0
+\end{align*}
+
+%7
+\Instructions
+\begin{align*}
+y &= 6 &
+x &= 6 &
+y &= 2.5 x - 10 &
+y &= 0 &
+y &= 2.5x - 7.5 &
+y &= 5 &
+x &= 1
+\end{align*}
+
+%O
+\Instructions
+\begin{enumerate}
+\renewcommand\theenumi{\Alph{enumi}}
+\item First outline:
+\begin{align*}
+y &= -x + 2 &
+x &= 1 &
+y &= x + 4 &
+y &= 6 \\
+y &= -x + 10 &
+x &= 5 &
+y &= x - 4 &
+y &= 0 &
+\end{align*}
+\item Second outline:
+\begin{align*}
+x &= 2 &
+y &= 5 &
+x &= 4 &
+y &= 1
+\end{align*}
+\end{enumerate}
+
+\end{document}

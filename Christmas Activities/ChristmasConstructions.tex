@@ -1,0 +1,226 @@
+\documentclass{article}
+\usepackage{multicol}
+\usepackage[scale=.85]{geometry}
+\usepackage{siunitx}
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Adventor}
+\usepackage{tikz}
+\usetikzlibrary{tikzmark,shapes.geometric}
+\title{Constructing a Christmas Tree}
+\thispagestyle{empty}
+\pagestyle{empty}
+
+\newcounter{tree}
+
+\makeatletter
+\tikzset{
+  fill colour/.code={%
+    \tikz@addoption{\pgfsetfillcolor{#1}}%
+    \def\tikz@fillcolor{#1}%
+  },
+  draw colour/.code={%
+    \tikz@addoption{\pgfsetstrokecolor{#1}}%
+    \def\tikz@strokecolor{#1}%
+  },
+}
+\makeatother
+\tikzset{
+  dot/.style={
+    minimum width=2.5mm,
+    ellipse,
+    fill,
+    node contents={},
+    on step=8{fill=none}
+  },
+  construction line/.style={
+    draw=gray
+  },
+  new line/.style={
+    draw=black
+  },
+  on step/.code 2 args={
+    \ifnum#1=\the\value{tree}\relax
+    \pgfkeysalso{#2}%
+    \fi
+  },
+  before step/.code 2 args={
+    \ifnum#1>\the\value{tree}\relax
+    \pgfkeysalso{#2}%
+    \fi
+  },
+  after step/.code 2 args={
+    \ifnum#1<\the\value{tree}\relax
+    \pgfkeysalso{#2}%
+    \fi
+  },
+  from step/.style 2 args={
+    on step={#1}{#2},%
+    after step={#1}{#2}%
+  },
+  between steps/.code args={#1 and #2#3}{
+    \ifnum#1<\the\value{tree}\relax
+    \ifnum#2>\the\value{tree}\relax
+    \pgfkeysalso{#3}%
+    \fi
+    \fi
+    \ifnum#1=\the\value{tree}\relax
+    \pgfkeysalso{#3}%
+    \fi
+    \ifnum#2=\the\value{tree}\relax
+    \pgfkeysalso{#3}%
+    \fi
+  },
+  colour step/.style={
+    before step={#1}{fill=none,draw=none},
+    on step={#1}{fill colour=black,draw colour=black},
+    after step={#1}{fill colour=gray,draw colour=gray},
+  },
+  colour steps between/.style args={#1 and #2}{
+    before step={#1}{fill=none,draw=none},
+    between steps=#1 and #2{fill colour=black,draw colour=black},
+    after step={#2}{fill colour=gray,draw colour=gray},
+  },
+  pics/christmas tree/.style={
+    code={
+      \stepcounter{tree}
+      \draw (0,0) rectangle (21,29);
+      \clip (0,0) rectangle (21,29);
+      \path (7,24) coordinate (a);
+      \path (14,24) coordinate (b);
+      \path (10.5,24) coordinate (c);
+      \path (c) ++(-120:3.5) coordinate (d);
+      \path (c) ++(-60:3.5) coordinate (e);
+      \path (c) ++(-150:3.5) coordinate (f);
+      \path (c) ++(-30:3.5) coordinate (g);
+      \path (a) ++(-150:3.5) coordinate (i);
+      \path (b) ++(-30:3.5) coordinate (j);
+      \path (f -| c) coordinate (h);
+      \draw[colour step=1] (1,24) -- (20,24);
+      \draw[colour step=2] (10.5,28) -- (10.5,10);
+      \draw[colour step=3] (10.5,24) arc[radius=3.5,start angle=0,delta angle=-180];
+      \draw[colour step=3] (10.5,24) arc[radius=3.5,start angle=-180,delta angle=180];
+      \draw[colour step=3] (14,24) arc[radius=3.5,start angle=0,delta angle=-180];
+      \draw[colour step=4] (c) -- (d);
+      \draw[colour step=4] (c) -- (e);
+      \draw[colour step=4] (10.5,24) -- ++(-150:8);
+      \draw[colour step=4] (10.5,24) -- ++(-30:8);
+      \draw[colour step=5] ([xshift=-1cm]i) -- ([xshift=1cm]j);
+      \draw[colour step=6] (i) arc[radius=6.531,start angle=-180,end angle=0];
+      \draw[colour step=6] (h) arc[radius=6.531,start angle=-180,end angle=0];
+      \draw[colour step=6] (h) arc[radius=6.531,start angle=0,end angle=-180];
+      \draw[colour steps between=7 and 8,on step=8{thick}] (10.5,24) arc[radius=3.5,start angle=0, end angle=-60] arc[radius=3.5, start angle=-120, end angle=-60] arc[radius=3.5, start angle=-120, end angle=-180];
+      \draw[colour steps between=7 and 8,on step=8{thick}] (h) arc[radius=6.531,start angle=0, end angle=-60] arc[radius=6.531, start angle=-120, end angle=-60] arc[radius=6.531, start angle=-120, end angle=-180];
+      \node[at=(a),dot,colour step=1,between steps=1 and 7{label=90:{\(A\)}}];
+      \node[at=(b),dot,colour step=1,between steps=1 and 7{label=90:{\(B\)}}];
+      \node[at=(c),dot,colour step=2,between steps=2 and 7{label=45:{\(C\)}}];
+      \node[at=(d),dot,colour step=3,between steps=3 and 7{label=-90:{\(D\)}}];
+      \node[at=(e),dot,colour step=3,between steps=3 and 7{label=-90:{\(E\)}}];
+      \node[at=(f),dot,colour step=4,between steps=4 and 7{label=-90:{\(F\)}}];
+      \node[at=(g),dot,colour step=4,between steps=4 and 7{label=-90:{\(G\)}}];
+      \node[at=(h),dot,colour step=5,between steps=5 and 7{label=-90:{\(H\)}}];
+      \node[at=(i),dot,colour step=5,between steps=5 and 7{label=-90:{\(I\)}}];
+      \node[at=(j),dot,colour step=5,between steps=5 and 7{label=-90:{\(J\)}}];
+    }
+  }
+}
+
+\begin{document}
+
+\section*{Constructing a Christmas Tree}
+
+Draw all construction lines and labels lightly.
+
+\begin{enumerate}
+\item
+\begin{multicols}{2}
+Begin with a horizontal line across your page about \SI{5}{cm} from the top.
+Mark points on your line about \SI{7}{cm} in from each edge of the paper.
+Label these points \(A\) and \(B\).
+
+\columnbreak
+\begin{tikzpicture}[scale=.2]
+\pic[transform shape]{christmas tree};
+\end{tikzpicture}
+\end{multicols}
+
+\item
+\begin{multicols}{2}
+Construct the perpendicular bisector of \(A\) and \(B\).
+Label the point where this crosses the original line as \(C\).
+
+\columnbreak
+\begin{tikzpicture}[scale=.2]
+\pic[transform shape]{christmas tree};
+\end{tikzpicture}
+\end{multicols}
+
+\item
+\begin{multicols}{2}
+Set your compass to the distance between \(A\) and \(C\).
+Draw three semi-circles centred at \(A\), \(B\), and \(C\) going below the original line.
+Label the points where the middle semi-circle crosses each of the other two as \(D\) and \(E\).
+
+\columnbreak
+\begin{tikzpicture}[scale=.2]
+\pic[transform shape]{christmas tree};
+\end{tikzpicture}
+\end{multicols}
+
+\newpage
+\item 
+\begin{multicols}{2}
+Draw a line from \(C\) to \(D\) and from \(C\) to \(E\).
+Bisect angle \(ACD\) and then bisect angle \(BCE\).
+Make your lines long enough to intersect the middle semi-circle.
+Label the points where the lines meet that semi-circle \(F\) and \(G\).
+
+\columnbreak
+\begin{tikzpicture}[scale=.2]
+\pic[transform shape]{christmas tree};
+\end{tikzpicture}
+\end{multicols}
+
+\item
+\begin{multicols}{2}
+Draw the line joining \(F\) and \(G\) and extend it to meet the two outer semi-circles.
+Mark where this line crosses the vertical line and label it \(H\).
+Mark where this line crosses the two outer semi-circles \(I\) and \(J\).
+
+\columnbreak
+\begin{tikzpicture}[scale=.2]
+\pic[transform shape]{christmas tree};
+\end{tikzpicture}
+\end{multicols}
+
+\item
+\begin{multicols}{2}
+Set your compasses to the distance between \(H\) and \(F\).
+Draw semi-circles at \(F\), \(G\), and \(H\) (as best fits on the paper).
+
+\columnbreak
+\begin{tikzpicture}[scale=.2]
+\pic[transform shape]{christmas tree};
+\end{tikzpicture}
+\end{multicols}
+
+\item
+\begin{multicols}{2}
+Now draw the following arcs in a heavier style.
+Start with the first three semi-circles that you drew (centred at \(A\), \(C\), and \(B\)).
+Starting at \(C\), follow the left-hand semi-circle (centred at \(A\)) until it meets the middle semi-circle.
+Then follow the middle semi-circle to the right until it meets the right-hand semi-circle.
+Finally, follow that back to \(C\).
+
+Repeat this for the lower three semi-circles (you may wish to not draw the part near the point \(H\))
+
+\columnbreak
+\begin{tikzpicture}[scale=.2]
+\pic[transform shape]{christmas tree};
+\end{tikzpicture}
+\begin{tikzpicture}[scale=.2]
+\pic[transform shape]{christmas tree};
+\end{tikzpicture}
+\end{multicols}
+
+\end{enumerate}
+\end{document}

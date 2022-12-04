@@ -1,0 +1,39 @@
+\documentclass{article}
+\usepackage[a6paper]{geometry}
+\thispagestyle{empty}
+\usepackage{amsmath}
+
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\setmainfont{TeX Gyre Chorus}
+\setmathfont{TeX Gyre Termes Math}
+
+\usepackage{pgfmorepages}
+\pgfmorepagesloadextralayouts
+\pgfpagesuselayout{repeated 4-up}[a4paper]
+
+
+\begin{document}
+
+%\LARGE
+
+In \texttt{Geogebra} create the functions \(f(x) = x^2\) and \(g(x) = -0.25 x^2\).
+Each of the following functions is a translate of one of \(f\) or \(g\).
+For each of the following functions, work out the translation and use the \texttt{translate} command in \texttt{Geogebra} to plot them.
+So if you figure out that one of them is a translate of \(f\) by the vector \(\begin{pmatrix} 3 \\ 4\end{pmatrix}\) then you would use the command:
+
+\begin{verbatim}
+translate(f, (3,4))
+\end{verbatim}
+
+\begin{enumerate}
+\item \(x^2 + 2 x\)
+\item \(2.25 + x - 0.25 x^2\)
+\item \(x^2 + 2 x + 2.25\)
+\item \(x^2 - 10 x + 24\)
+\item \(x^2 - 10 x + 26.25\)
+\item \(-0.2 + x - 0.25 x^2\)
+\end{enumerate}
+
+\end{document}
+

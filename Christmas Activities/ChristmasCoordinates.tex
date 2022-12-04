@@ -1,0 +1,103 @@
+\documentclass{article}
+\usepackage[a6paper,scale=.77]{geometry}
+
+\thispagestyle{empty}
+
+\usepackage{tikz}
+\usepackage{expl3}
+\usepackage{xparse}
+
+\usepackage{pgfmorepages}
+\pgfmorepagesloadextralayouts
+\pgfpagesuselayout{repeated 4-up}
+
+\ExplSyntaxOn
+\clist_new:N \l__coord_clist
+\tl_new:N \l__coord_tl
+\DeclareDocumentCommand\SetPoints {m} {
+\clist_set:Nn \l__coord_clist {#1}
+\cs_if_exist:NTF \draw
+{
+\tl_clear:N \l__coord_tl
+\tl_set:Nn \l__coord_tl {\draw}
+\tl_put_right:Nx \l__coord_tl {(\clist_use:Nn \l__coord_clist {) -- (})}
+\tl_put_right:Nn \l__coord_tl {;}
+\tl_use:N \l__coord_tl
+}
+{
+\item  \((\clist_use:Nn \l__coord_clist {)\),~ \((})\)
+ }
+}
+\ExplSyntaxOff
+\begin{document}
+\section*{Christmas Coordinate Pictures}
+\begin{enumerate}
+%\item \begin{tikzpicture}
+\SetPoints{%
+{5,0},{1,1},{0,5},{-1,1},{-5,0},{-1,-1},{0,-5},{1,-1},{5,0}
+}
+%\end{tikzpicture}
+
+%\item \begin{tikzpicture}
+\SetPoints{%
+{2,0},{4,2},{2,2},{2,4},{0,2},{-2,4},{-2,2},{-4,2},{-2,0},
+{-4,-2},{-2,-2},{-2,-4},{0,-2},{2,-4},{2,-2},{4,-2},{2,0}
+}
+%\end{tikzpicture}
+
+\item
+\begin{itemize}
+%\begin{tikzpicture}[scale=.3]
+\SetPoints{%
+{0,10},{2,7},{1,7},{3,4},{2,4},{4,1},{1,1},{-1,1},{-4,1},{-2,4},{-3,4},{-3,4},{-1,7},{-2,7},{0,10}
+}
+
+\SetPoints{%
+{1,1},{1,-1},{-1,-1},{-1,1},{1,1}
+}
+
+\SetPoints{%
+{3,-1},{2,-4},{-2,-4},{-3,-1},{3,-1}
+}
+%\end{tikzpicture}
+\end{itemize}
+
+\item
+\begin{itemize}
+%\begin{tikzpicture}[scale=.3]
+\SetPoints{%
+{4,4},{-4,4},{-4,-4},{4,-4},{4,4}
+}
+
+\SetPoints{%
+{-4,4}, {0,6},{8,6},{8,-2},{4,-4}
+}
+
+\SetPoints{%
+{4,0},{-4,0}
+}
+
+\SetPoints{%
+{0,4},{0,-4}
+}
+
+\SetPoints{%
+{4,4},{8,6}
+}
+
+\SetPoints{%
+{0,4},{4,6}
+}
+
+\SetPoints{%
+{4,0},{8,2}
+}
+
+\SetPoints{%
+{6,-3},{6,5},{-2,5}
+}
+%\end{tikzpicture}
+\end{itemize}
+\end{enumerate}
+
+\end{document}

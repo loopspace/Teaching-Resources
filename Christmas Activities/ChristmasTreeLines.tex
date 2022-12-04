@@ -1,0 +1,49 @@
+\documentclass{article}
+\thispagestyle{empty}
+\pagestyle{empty}
+
+%\usepackage{pgfmorepages}
+%\pgfpagesuselayout{2 on 1}[landscape]
+
+\usepackage[a5paper,landscape]{geometry}
+
+\usepackage{amsmath}
+
+\def\Instructions{%
+  \clearpage
+\paragraph{Instructions:}
+\begin{enumerate}
+\item Draw axes with \(-4 \le x \le 4\) and \(-5 \le y \le 7\).
+\item On your axes, \textbf{lightly} draw each of the following lines.
+\item After drawing all of the lines, start at the point where the \textbf{first} and \textbf{last} lines meet.
+\item From that point, redraw more heavily the first line until it meets the second line.
+(The set of lines reads \emph{across} and then \emph{down}.)
+\item Then redraw the second line from that point until it meets the third line.
+\item Continue this until you get to the last line.
+\item Redraw the last line until it meets the first line again.
+\end{enumerate}
+}
+
+\begin{document}
+
+\Instructions
+
+\begin{align*}
+2 y + 3 x &= 12
+& y &= 3
+& 2y + 3x &= 9
+& y &= 0
+& 2 x &= 1
+\\ y + 2&= 0
+& 4x &= y + 8
+& y + 4 &= 0
+& y + 4x + 8 &= 0
+& y &= -2 
+\\ 2x + 1 &= 0
+& y &= 0
+& 2 y &= 3x + 9
+& y &= 3
+& 2 y &= 3x + 12
+\end{align*}
+
+\end{document}
