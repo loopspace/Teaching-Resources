@@ -15,3 +15,4 @@
 * Quadratic Christmas Tree: Draw a Christmas tree using quadratics
 * Large Christmas Data: Various data sets that draw Christmassy pictures when
   plotted
+* Santa's Trip: A couple of graph theory puzzles with a Christmas theme
