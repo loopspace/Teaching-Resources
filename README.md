@@ -13,3 +13,5 @@
 * Christmas Tree: Find the area of a Christmas tree (A level)
 * Proportionate Christmas: Proportion questions about Christmas
 * Quadratic Christmas Tree: Draw a Christmas tree using quadratics
+* Large Christmas Data: Various data sets that draw Christmassy pictures when
+  plotted
