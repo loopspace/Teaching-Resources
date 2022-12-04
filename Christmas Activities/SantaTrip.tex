@@ -1,0 +1,701 @@
+\documentclass{article}
+
+\thispagestyle{empty}
+
+\usepackage{fontspec}
+\usepackage{unicode-math}
+
+\usepackage{tikz}
+
+\usetikzlibrary{
+  arrows.meta,
+  math,
+  shapes.geometric,
+%  external,
+  calc
+}
+
+\setmainfont{TeX Gyre Bonum}
+\setmathfont{TeX Gyre Bonum Math}
+
+\newcounter{vertices}
+\newcounter{centres}
+\newcounter{edges}
+
+\pgfdeclarelayer{lines}
+\pgfsetlayers{main,lines}
+
+\colorlet{edge0}{cyan!75!black}
+\colorlet{edge1}{magenta!75!black}
+\colorlet{edge2}{yellow!75!black}
+\colorlet{edge3}{red!75!black}
+\colorlet{edge4}{green!75!black}
+\colorlet{edge5}{blue!75!black}
+
+\colorlet{dodeca}{red!75!white}
+\colorlet{icosa}{green!75!white}
+
+
+\tikzset{
+  set fill colour/.code={%
+    \pgfmathparse{int(mod(#1,3))}%
+    \pgfkeysalso{fill=edge\pgfmathresult}%
+  },
+  coloured edge/.style={
+    set fill colour=\the\value{edges},
+%    fill=none,
+%    draw=black,
+%    line width=2pt,
+    edge \the\value{edges}/.try,
+    step counter=edges,
+  },
+  vertex/.style={
+    coordinate,
+    node contents={},
+    at={#1},
+    name=v-\the\value{vertices},
+    step counter=vertices,
+  },
+  step counter/.code={
+    \stepcounter{#1}
+  },
+  every label/.style={text=green!50,font=\Huge},
+  incentre style/.style={
+    coordinate,
+    node contents={},
+    name=c-\the\value{centres},
+    step counter=centres,
+  },
+  incentre/.style n args={3}{
+    incentre style,
+    evaluate={
+      coordinate \p, \I;
+      \p1 = (#1); \p2 = (#2); \p3 = (#3);
+      \a = veclen(\px3-\px2, \py3-\py2);
+      \b = veclen(\px1-\px3, \py1-\py3);
+      \c = veclen(\px2-\px1, \py2-\py1);
+      % Normalize the lengths a bit
+      \m = max(\a, \b, \c);
+      \a = \a / \m; \b = \b / \m; \c = \c / \m;
+      % Get the incenter
+      \ix = (\a*\px1 + \b*\px2 + \c*\px3) / (\a + \b + \c);
+      \iy = (\a*\py1 + \b*\py2 + \c*\py3) / (\a + \b + \c);
+      \I = (\ix pt, \iy pt);
+    },
+    at={(\I)},
+  },
+  barycentre/.style n args={4}{
+    evaluate={
+      coordinate \p, \B;
+      \p1 = (#1); \p2 = (#2); \p3 = (#3); \p4 = (#4);
+      \ix = .25*\px1 + .25*\px2 + .25*\px3 + .25*\px4;
+      \iy = .25*\py1 + .25*\py2 + .25*\py3 + .25*\py4;
+      \B = (\ix pt, \iy pt);
+    },
+    at={(\B)},
+    node contents={\the\value{edges}},
+    text=white,
+%    font=\Huge
+  },
+  do edge/.style n args={4}{%
+    insert path={(v-#1) -- (c-#2) -- (v-#3) -- (c-#4) -- cycle node[barycentre={v-#1}{c-#2}{v-#3}{c-#4}]},
+    coloured edge,
+  },
+  outline edge/.style n args={4}{%
+    insert path={(v-#1) -- (c-#2) -- (v-#3) -- (c-#4) -- cycle}
+  },
+  label edge/.style n args={4}{%
+    insert path={(v-#1) -- (c-#2) -- (v-#3) -- (c-#4) -- cycle node[barycentre={v-#1}{c-#2}{v-#3}{c-#4}]},
+    step counter=edges,
+  },
+  edge style/.style={
+    line width=2pt,
+    #1,
+%    draw=none,
+  },
+  %
+  tetrahedron/.pic={
+    \coordinate (A) at (2,3);
+    \coordinate (B) at (2,-1);
+    \coordinate (C) at (4,0);
+    \coordinate (D) at (0,0);
+    \draw[dashed, edge cd/.try] (C) -- (D);
+    \draw[edge ab/.try] (A) -- (B);
+    \draw[edge ac/.try] (A) -- (C);
+    \draw[edge ad/.try] (A) -- (D);
+    \draw[edge bc/.try] (B) -- (C);
+    \draw[edge bd/.try] (B) -- (D);
+  },
+  octahedron/.pic={
+    \setcounter{vertices}{0}
+    \setcounter{centres}{0}
+    \setcounter{edges}{0}
+    \foreach \k in {1,2,3} {
+      \node[vertex={(\k*120:1)}];
+    }
+    \foreach \k in {1,2,3} {
+      \node[vertex={(\k*120+60:2)}];
+    }
+
+    \node[incentre={v-0}{v-1}{v-2}]; %0
+    \node[incentre={v-0}{v-3}{v-1}]; %1
+    \node[incentre={v-1}{v-4}{v-2}]; %2
+    \node[incentre={v-2}{v-5}{v-0}]; %3
+    \node[incentre style,at={(120:2)}]; %4
+    \node[incentre style,at={(240:2)}]; %5
+    \node[incentre style,at={(0:2)}]; %6
+    \node[incentre style,at={(120:2.5)}]; %7
+    \node[incentre style,at={(240:2.5)}]; %8
+    \node[incentre style,at={(0:2.5)}]; %9
+
+    \fill[outline edge=0011,every octahedron edge/.try, edge 0/.try];
+    \fill[outline edge=1022,every octahedron edge/.try, edge 1/.try];
+    \fill[outline edge=2003,every octahedron edge/.try, edge 2/.try];
+
+    \fill[outline edge=0134,every octahedron edge/.try, edge 3/.try];
+    \fill[outline edge=0354,every octahedron edge/.try, edge 4/.try];
+    \fill[outline edge=1245,every octahedron edge/.try, edge 5/.try];
+    \fill[outline edge=1135,every octahedron edge/.try, edge 6/.try];
+    \fill[outline edge=2356,every octahedron edge/.try, edge 7/.try];
+    \fill[outline edge=2246,every octahedron edge/.try, edge 8/.try];
+    \fill[every octahedron edge/.try, edge 9/.try] (v-3) -- +(180:1) arc[radius=3cm,start angle=180, delta angle=120] -- +(-60:-1) -- (v-4) -- (c-5) -- cycle;
+    \fill[every octahedron edge/.try, edge 10/.try] (v-4) -- +(-60:1) arc[radius=3cm,start angle=-60, delta angle=120] -- +(60:-1) -- (v-5) -- (c-6) -- cycle;
+    \fill[every octahedron edge/.try, edge 11/.try] (v-5) -- +(60:1) arc[radius=3cm,start angle=60, delta angle=120] -- +(180:-1) -- (v-3) -- (c-4) -- cycle;
+
+    \begin{scope}[edges/.try]
+    \draw[outline edge=0011];
+    \draw[outline edge=1022];
+    \draw[outline edge=2003];
+    \draw[outline edge=0134];
+    \draw[outline edge=0354];
+    \draw[outline edge=1245];
+    \draw[outline edge=1135];
+    \draw[outline edge=2356];
+    \draw[outline edge=2246];
+    \draw (v-3) -- +(180:1);
+    \draw (v-4) -- +(-60:1);
+    \draw (v-5) -- +(60:1);
+    \end{scope}
+    
+    \foreach[evaluate=\k as \pk using {int(\k-1)}] \k in {1,...,\value{vertices}} {
+      \fill[fill=icosa] (v-\pk) circle[radius=.1cm];
+    }
+    \foreach \k in {0,...,6} {
+      \fill[fill=dodeca] (c-\k) circle[radius=.1cm];
+    }
+
+    \draw[dodeca,ultra thick] (0,0) circle[radius=3cm];
+  },
+  cube/.pic={
+    \setcounter{vertices}{0}
+    \setcounter{centres}{0}
+    \setcounter{edges}{0}
+    \node[vertex={(0,1.414)}]; %0
+    \node[vertex={(0,0)}]; %1
+    \node[vertex={(1.414,0)}]; %2
+    \node[vertex={(-1.414,0)}]; %3
+    \node[vertex={(0,-1.414)}]; %4
+
+    \node[vertex={(45:3)}]; %5
+    \node[vertex={(135:3)}]; %6
+    \node[vertex={(-135:3)}]; %7
+    \node[vertex={(-45:3)}]; %8
+    
+    \node[incentre={v-0}{v-1}{v-2}]; %0
+    \node[incentre={v-0}{v-3}{v-1}]; %1
+    \node[incentre={v-1}{v-4}{v-2}]; %2
+    
+    \node[incentre style,at={(45:2)}]; %3
+    \node[incentre style,at={(135:2)}]; %4
+    \node[incentre={v-1}{v-4}{v-3}]; %5
+    \node[incentre style,at={(-45:2)}]; %6
+    \node[incentre style,at={(-135:2)}]; %7
+
+    \node[incentre style,at={(120:2.5)}]; %7
+    \node[incentre style,at={(240:2.5)}]; %8
+    \node[incentre style,at={(0:2.5)}]; %9
+
+    \fill[outline edge=0011,every cube edge/.try, edge 0/.try];
+    \fill[outline edge=1022,every cube edge/.try, edge 1/.try];
+    \fill[outline edge=2003,every cube edge/.try, edge 2/.try];
+
+    \fill[outline edge=0134,every cube edge/.try, edge 3/.try];
+%    \tikzset{step counter=edges}
+    \fill[outline edge=1245,every cube edge/.try, edge 5/.try];
+    \fill[outline edge=1135,every cube edge/.try, edge 6/.try];
+%    \tikzset{step counter=edges}
+
+    \fill[outline edge=2246,every cube edge/.try, edge 8/.try];
+    \fill[outline edge=3547,every cube edge/.try, edge 9/.try];
+    \fill[every cube edge/.try, edge 4/.try] (c-3) -- +(45:1) arc[radius=3cm,start angle=45, delta angle=90] -- (c-4) -- (v-0) -- cycle;
+    \fill[every cube edge/.try, edge 11/.try] (c-4) -- +(135:1) arc[radius=3cm,start angle=135, delta angle=90] -- (c-7) -- (v-3) -- cycle;
+    \fill[every cube edge/.try, edge 10/.try] (c-7) -- +(-135:1) arc[radius=3cm,start angle=-135, delta angle=90] -- (c-6) -- (v-4) -- cycle;
+    \fill[every cube edge/.try, edge 7/.try] (c-6) -- +(-45:1) arc[radius=3cm,start angle=-45, delta angle=90] -- (c-3) -- (v-2) -- cycle;
+
+    \begin{scope}[edges/.try]
+    \draw[outline edge=0011];
+    \draw[outline edge=1022];
+    \draw[outline edge=2003];
+    \draw[outline edge=0134];
+    \draw[outline edge=3547];
+    \draw[outline edge=1245];
+    \draw[outline edge=1135];
+    \draw[outline edge=2246];
+    \draw (c-3) -- +(45:1);
+    \draw (c-4) -- +(135:1);
+    \draw (c-6) -- +(-45:1);
+    \draw (c-7) -- +(-135:1);
+    \end{scope}
+    
+    \foreach \k in {0,...,4} {
+      \fill[fill=icosa] (v-\k) circle[radius=.1cm];
+    }
+    \foreach \k in {0,...,7} {
+      \fill[fill=dodeca] (c-\k) circle[radius=.1cm];
+    }
+
+    \draw[icosa,ultra thick] (0,0) circle[radius=3cm];
+  },
+  icosahedron/.pic={
+    \setcounter{vertices}{0}
+    \setcounter{centres}{0}
+    \setcounter{edges}{0}
+    %\useasboundingbox (30:{sqrt(3)}) circle[radius=8*sqrt(3)];
+    \node[vertex={(0,0)}]; %0
+    \node[vertex={(3,0)}]; %1
+    \node[vertex={(60:3)}]; %2
+    \node[vertex={(120:3)}]; %3
+    \node[vertex={(-60:3)}]; %4
+    \node[vertex={($(v-1)+(60:3)$)}]; %5
+    \node[vertex={($(v-2)+(90:{3*sqrt(3)})$)}]; %6
+    \node[vertex={(-150:{3*sqrt(3)})}]; %7
+    \node[vertex={($(v-1)+(-30:{3*sqrt(3)})$)}]; %8
+    \node[vertex={($(v-5)+(30:{6*sqrt(3)})$)}]; %9
+    \node[vertex={($(v-3)+(150:{6*sqrt(3)})$)}]; %10
+    \node[vertex={($(v-4)+(-90:{6*sqrt(3)})$)}]; %11
+
+    \node[vertex={($(v-5)+(30:{12*sqrt(3)})$)}]; %12
+    \node[vertex={($(v-3)+(150:{12*sqrt(3)})$)}]; %13
+    \node[vertex={($(v-4)+(-90:{12*sqrt(3)})$)}]; %14
+
+    \node[incentre={v-0}{v-1}{v-2}]; %0
+    \node[incentre={v-0}{v-1}{v-4}]; %1
+    \node[incentre={v-1}{v-2}{v-5}]; %2
+    \node[incentre={v-2}{v-0}{v-3}]; %3
+    \node[incentre={v-0}{v-3}{v-7}]; %4
+    \node[incentre={v-0}{v-4}{v-7}]; %5
+    \node[incentre={v-1}{v-4}{v-8}]; %6
+    \node[incentre={v-1}{v-5}{v-8}]; %7
+    \node[incentre={v-2}{v-5}{v-6}]; %8
+    \node[incentre={v-2}{v-3}{v-6}]; %9
+    \node[incentre={v-3}{v-6}{v-10}]; %10
+    \node[incentre={v-3}{v-7}{v-10}]; %11
+    \node[incentre={v-4}{v-7}{v-11}]; %12
+    \node[incentre={v-4}{v-8}{v-11}]; %13
+    \node[incentre={v-5}{v-8}{v-9}]; %14
+    \node[incentre={v-5}{v-6}{v-9}]; %15
+
+    \node[incentre style,at={($(v-6)+(90:{2.5*sqrt(3)})$)}];   %16
+    \node[incentre style,at={($(v-7)+(-150:{2.5*sqrt(3)})$)}]; %17
+    \node[incentre style,at={($(v-8)+(-30:{2.5*sqrt(3)})$)}];  %18
+
+    \node[incentre style,at={($(c-0)+(30:18)$)}];
+    \node[incentre style,at={($(c-0)+(150:18)$)}];
+    \node[incentre style,at={($(c-0)+(270:18)$)}];
+
+    %\node[incentre style,at={($(v-6)+(90:{12*sqrt(3)})$)}]; %19
+    %\node[incentre style,at={($(v-7)+(-150:{12*sqrt(3)})$)}]; %20
+    %\node[incentre style,at={($(v-8)+(-30:{12*sqrt(3)})$)}]; %21
+
+\fill[outline edge=0011,every icosahedral edge/.try, edge 0/.try];
+\fill[outline edge=1022,every icosahedral edge/.try, edge 1/.try];
+\fill[outline edge=2003,every icosahedral edge/.try, edge 2/.try];
+
+\fill[outline edge=2258,every icosahedral edge/.try, edge 3/.try];
+\fill[outline edge=0334,every icosahedral edge/.try, edge 4/.try];
+\fill[outline edge=1146,every icosahedral edge/.try, edge 5/.try];
+
+\fill[outline edge=2339,every icosahedral edge/.try, edge 6/.try];
+\fill[outline edge=0145,every icosahedral edge/.try, edge 7/.try];
+\fill[outline edge=1257,every icosahedral edge/.try, edge 8/.try];
+
+\fill[outline edge=0475,every icosahedral edge/.try, edge 9/.try];
+\fill[outline edge=1687,every icosahedral edge/.try, edge 10/.try];
+\fill[outline edge=2869,every icosahedral edge/.try, edge 11/.try];
+
+\fill[outline edge=875{14},every icosahedral edge/.try, edge 12/.try];
+\fill[outline edge=693{10},every icosahedral edge/.try, edge 13/.try];
+\fill[outline edge=754{12},every icosahedral edge/.try, edge 14/.try];
+
+\fill[outline edge=468{13},every icosahedral edge/.try, edge 15/.try];
+\fill[outline edge=586{15},every icosahedral edge/.try, edge 16/.try];
+\fill[outline edge=347{11},every icosahedral edge/.try, edge 17/.try];
+
+\fill[outline edge={3}{10}{10}{11},every icosahedral edge/.try, edge 18/.try];
+\fill[outline edge={4}{12}{11}{13},every icosahedral edge/.try, edge 19/.try];
+\fill[outline edge={5}{14}{9}{15},every icosahedral edge/.try, edge 20/.try];
+
+\fill[outline edge={7}{12}{11}{17},every icosahedral edge/.try, edge 21/.try];
+\fill[outline edge={8}{14}{9}{18},every icosahedral edge/.try, edge 22/.try];
+\fill[outline edge={6}{10}{10}{16},every icosahedral edge/.try, edge 23/.try];
+
+\fill[outline edge={6}{15}{9}{16},every icosahedral edge/.try, edge 24/.try];
+\fill[outline edge={7}{11}{10}{17},every icosahedral edge/.try, edge 25/.try];
+\fill[outline edge={8}{13}{11}{18},every icosahedral edge/.try, edge 26/.try];
+
+\fill[every icosahedral edge/.try, edge 27/.try] (v-9) -- (c-19) arc[radius=18cm, start angle=30, delta angle=120] -- (v-10) -- (c-16) -- cycle;
+\fill[every icosahedral edge/.try, edge 28/.try] (v-10) -- (c-20) arc[radius=18cm, start angle=150, delta angle=120] -- (v-11) -- (c-17) -- cycle;
+\fill[every icosahedral edge/.try, edge 29/.try] (v-11) -- (c-21) arc[radius=18cm, start angle=270, delta angle=120] -- (v-9) -- (c-18) -- cycle;
+
+    \begin{scope}[edges/.try]
+    \draw[outline edge=0011];
+    \draw[outline edge=1022];
+    \draw[outline edge=2003];
+
+    \draw[outline edge=2258];
+    \draw[outline edge=0334];
+    \draw[outline edge=1146];
+
+    \draw[outline edge=2339];
+    \draw[outline edge=0145];
+    \draw[outline edge=1257];
+
+    \draw[outline edge=0475];
+    \draw[outline edge=1687];
+    \draw[outline edge=2869];
+
+    \draw[outline edge=875{14}];
+    \draw[outline edge=693{10}];
+    \draw[outline edge=754{12}];
+
+    \draw[outline edge=468{13}];
+    \draw[outline edge=586{15}];
+    \draw[outline edge=347{11}];
+
+    \draw[outline edge={3}{10}{10}{11}];
+    \draw[outline edge={4}{12}{11}{13}];
+    \draw[outline edge={5}{14}{9}{15}];
+
+    \draw[outline edge={7}{12}{11}{17}];
+    \draw[outline edge={8}{14}{9}{18}];
+    \draw[outline edge={6}{10}{10}{16}];
+
+    \draw[outline edge={6}{15}{9}{16}];
+    \draw[outline edge={7}{11}{10}{17}];
+    \draw[outline edge={8}{13}{11}{18}];
+
+    %\draw (v-11) -- (c-18) -- (v-9) -- (v-12) -- (c-21) -- (v-14) -- cycle;
+    %\draw (v-9) -- (c-16) -- (v-10) -- (v-13) -- (c-19) -- (v-12) -- cycle;
+    %\draw (v-10) -- (c-17) -- (v-11) -- (v-14) -- (c-20) -- (v-13) -- cycle;
+
+    \draw (v-11) -- +(270:4.1);% (v-11);
+    \draw (v-9) -- +(30:4.1);
+    \draw (v-10) -- +(150:4.1);
+    \end{scope}
+    
+    \foreach \k in {0,...,11} {
+      \fill[fill=icosa] (v-\k) circle[radius=.3cm];
+      %  \node[above,text=white] at ([yshift=.3cm]v-\k) {\Huge\textbf{\k}};
+    }
+
+    \foreach \k in {0,...,18} {
+      \fill[fill=dodeca] (c-\k) circle[radius=.3cm];
+      %  \node[above,text=orange] at ([yshift=.3cm]c-\k) {\Huge\textbf{\k}};
+    }
+
+    \draw[ultra thick,dodeca] (c-0) circle[radius=18cm];
+
+  },
+  dodecahedron/.pic={
+    \setcounter{vertices}{0}
+    \setcounter{centres}{0}
+    \setcounter{edges}{0}
+    %\useasboundingbox (30:{sqrt(3)}) circle[radius=8*sqrt(3)];
+    \node[vertex={(234:6)}]; %0
+    \node[vertex={(306:6)}]; %1
+    \node[vertex={(0,0)}]; %2
+    \node[vertex={(162:6)}]; %3
+    \node[vertex={(-90:12)}]; %4
+    \node[vertex={(18:6)}]; %5
+    \node[vertex={(90:6)}]; %6
+    \node[vertex={(198:12)}]; %7
+    \node[vertex={(-18:12)}]; %8
+    \node[vertex={(54:12)}]; %9
+    \node[vertex={(126:12)}]; %10
+    
+    \node[vertex={(90:18)}]; %11
+    \node[vertex={(162:18)}]; %12
+    \node[vertex={(234:18)}]; %13
+    \node[vertex={(306:18)}]; %14
+    \node[vertex={(18:18)}]; %15
+
+    \node[incentre={v-0}{v-1}{v-2}]; %0
+    \node[incentre={v-0}{v-1}{v-4}]; %1
+    \node[incentre={v-1}{v-2}{v-5}]; %2
+    \node[incentre={v-2}{v-0}{v-3}]; %3
+    \node[incentre={v-0}{v-3}{v-7}]; %4
+    \node[incentre={v-0}{v-4}{v-7}]; %5
+    \node[incentre={v-1}{v-4}{v-8}]; %6
+    \node[incentre={v-1}{v-5}{v-8}]; %7
+    \node[incentre={v-2}{v-5}{v-6}]; %8
+    \node[incentre={v-2}{v-3}{v-6}]; %9
+    \node[incentre={v-3}{v-6}{v-10}]; %10
+    \node[incentre={v-3}{v-7}{v-10}]; %11
+    \node[incentre style,at={($(c-5)!.5!(v-13)$)}];  %12
+    \node[incentre style,at={($(c-6)!.5!(v-14)$)}];  %13
+    \node[incentre={v-5}{v-8}{v-9}]; %14
+    \node[incentre={v-5}{v-6}{v-9}]; %15
+    \node[incentre={v-6}{v-9}{v-10}]; %16
+
+    \node[incentre style,at={($(c-11)!.5!(v-12)$)}];  %17
+    \node[incentre style,at={($(c-14)!.5!(v-15)$)}];  %18
+    \node[incentre style,at={($(c-16)!.5!(v-11)$)}];  %19
+
+    
+    \node[incentre style,at={($(c-0)+(30:18)$)}];
+    \node[incentre style,at={($(c-0)+(150:18)$)}];
+    \node[incentre style,at={($(c-0)+(270:18)$)}];
+
+\fill[outline edge=0011,every dodecahedral edge/.try, edge 0/.try];
+\fill[outline edge=1022,every dodecahedral edge/.try, edge 1/.try];
+\fill[outline edge=2003,every dodecahedral edge/.try, edge 2/.try];
+
+\fill[outline edge=2258,every dodecahedral edge/.try, edge 3/.try];
+\fill[outline edge=0334,every dodecahedral edge/.try, edge 4/.try];
+\fill[outline edge=1146,every dodecahedral edge/.try, edge 5/.try];
+
+\fill[outline edge=2339,every dodecahedral edge/.try, edge 6/.try];
+\fill[outline edge=0145,every dodecahedral edge/.try, edge 7/.try];
+\fill[outline edge=1257,every dodecahedral edge/.try, edge 8/.try];
+
+\fill[outline edge=0475,every dodecahedral edge/.try, edge 9/.try];
+\fill[outline edge=1687,every dodecahedral edge/.try, edge 10/.try];
+\fill[outline edge=2869,every dodecahedral edge/.try, edge 11/.try];
+
+\fill[outline edge=875{14},every dodecahedral edge/.try, edge 12/.try];
+\fill[outline edge=693{10},every dodecahedral edge/.try, edge 13/.try];
+\fill[outline edge=754{12},every dodecahedral edge/.try, edge 14/.try];
+
+\fill[outline edge=468{13},every dodecahedral edge/.try, edge 15/.try];
+\fill[outline edge=586{15},every dodecahedral edge/.try, edge 16/.try];
+\fill[outline edge=347{11},every dodecahedral edge/.try, edge 17/.try];
+
+\fill[outline edge={3}{10}{10}{11},every dodecahedral edge/.try, edge 18/.try];
+\fill[outline edge={5}{14}{9}{15},every dodecahedral edge/.try, edge 20/.try];
+
+\fill[outline edge={8}{14}{9}{18},every dodecahedral edge/.try, edge 22/.try];
+\fill[outline edge={6}{10}{10}{16},every dodecahedral edge/.try, edge 23/.try];
+
+\fill[outline edge={6}{15}{9}{16},every dodecahedral edge/.try, edge 24/.try];
+\fill[outline edge={7}{11}{10}{17},every dodecahedral edge/.try, edge 25/.try];
+
+    \fill[outline edge={9}{16}{10}{19}, every dodecahedral edge/.try, edge 27/.try];
+    \fill[every dodecahedral edge/.try, edge 19/.try] (c-12) -- (v-13) arc[radius=18cm, start angle=234, delta angle=72] -- (c-13) -- (v-4) -- cycle;
+    \fill[every dodecahedral edge/.try, edge 26/.try] (c-13) -- (v-14) arc[radius=18cm, start angle=306, delta angle=72] -- (c-18) -- (v-8) -- cycle;
+    \fill[every dodecahedral edge/.try, edge 29/.try] (c-18) -- (v-15) arc[radius=18cm, start angle=18, delta angle=72] -- (c-19) -- (v-9) -- cycle;
+    \fill[every dodecahedral edge/.try, edge 28/.try] (c-19) -- (v-11) arc[radius=18cm, start angle=90, delta angle=72] -- (c-17) -- (v-10) -- cycle;
+    \fill[every dodecahedral edge/.try, edge 21/.try] (c-17) -- (v-12) arc[radius=18cm, start angle=162, delta angle=72] -- (c-12) -- (v-7) -- cycle;
+
+    \begin{scope}[edges/.try]
+    \draw[outline edge=0011];
+    \draw[outline edge=1022];
+    \draw[outline edge=2003];
+
+    \draw[outline edge=2258];
+    \draw[outline edge=0334];
+    \draw[outline edge=1146];
+
+    \draw[outline edge=2339];
+    \draw[outline edge=0145];
+    \draw[outline edge=1257];
+
+    \draw[outline edge=0475];
+    \draw[outline edge=1687];
+    \draw[outline edge=2869];
+
+    \draw[outline edge=875{14}];
+    \draw[outline edge=693{10}];
+    \draw[outline edge=754{12}];
+
+    \draw[outline edge=468{13}];
+    \draw[outline edge=586{15}];
+    \draw[outline edge=347{11}];
+
+    \draw[outline edge={3}{10}{10}{11}];
+    \draw[outline edge={5}{14}{9}{15}];
+
+    \draw[outline edge={8}{14}{9}{18}];
+    \draw[outline edge={6}{10}{10}{16}];
+
+    \draw[outline edge={6}{15}{9}{16}];
+    \draw[outline edge={7}{11}{10}{17}];
+    \draw[outline edge={9}{16}{10}{19}];
+
+    \draw (c-12) -- (v-13);
+    \draw (c-13) -- (v-14);
+    \draw (c-19) -- (v-11);
+    \draw (c-18) -- (v-15);
+    \draw (c-17) -- (v-12);
+
+    \end{scope}
+    
+    \foreach \k in {0,...,10} {
+      \fill[fill=icosa] (v-\k) circle[radius=.3cm];
+      %  \node[above,text=white] at ([yshift=.3cm]v-\k) {\Huge\textbf{\k}};
+    }
+
+    \foreach \k in {0,...,19} {
+      \fill[fill=dodeca] (c-\k) circle[radius=.3cm];
+      %  \node[above,text=orange] at ([yshift=.3cm]c-\k) {\Huge\textbf{\k}};
+    }
+
+    \draw[ultra thick,icosa] (v-2) circle[radius=18cm];
+
+  }
+}
+  
+
+
+
+
+\begin{document}
+
+\section*{Plotting the Perfect Christmas}
+
+\subsection*{Towns}
+
+When Father Christmas visits a town, he clearly can't waste time!
+Can you find a route for him around each of these towns so that he only goes down each street once?
+
+\vfill
+
+\begin{center}
+\begin{tikzpicture}
+\begin{scope}[yscale={sqrt(3)/2}]
+\foreach \j in {0,...,3}
+{
+  \foreach \k in {0,...,\j}
+  {
+    \coordinate (a-\k-\j) at (\k-\j/2,-\j);
+    \fill (a-\k-\j) circle[radius=2pt];
+  }
+}
+\foreach[evaluate=\j as \nj using int(\j+1)] \j in {0,...,2}
+{
+  \foreach[evaluate=\k as \nk using int(\k+1)] \k in {0,...,\j}
+  {
+    \draw (a-\k-\j) -- (a-\k-\nj) -- (a-\nk-\nj) -- cycle;
+  }
+}
+\end{scope}
+\begin{scope}[shift={(4,0)}]
+\foreach \j in {0,...,2}
+\foreach \k in {0,...,2}
+{
+  \coordinate (b-\k-\j) at (\k,-\j);
+  \fill (b-\k-\j) circle[radius=2pt];
+}
+
+\draw (b-0-0) -| (b-2-2) -| cycle;
+\draw (b-1-0) -- (b-1-2);
+\draw (b-0-1) -- (b-2-1);
+\draw (b-1-0) -- (b-2-1);
+\draw (b-0-1) -- (b-1-2);
+
+\end{scope}
+\begin{scope}[shift={(0,-4)}]
+\foreach \j in {0,...,2}
+\foreach \k in {0,...,2}
+{
+  \coordinate (c-\k-\j) at (\k,-\j);
+  \fill (c-\k-\j) circle[radius=2pt];
+}
+
+\draw (c-0-0) -| (c-2-2) -| cycle;
+\draw (c-1-0) -- (c-1-2);
+\draw (c-0-1) -- (c-2-1);
+\draw (c-1-0) -- (c-2-1);
+
+\end{scope}
+\begin{scope}[shift={(4,-4)},yscale={sqrt(3)/2}]
+\coordinate (d-0) at (0,0);
+\coordinate (d-1) at (1,0);
+\coordinate (d-2) at (-.5,-1);
+\coordinate (d-3) at (1.5,-1);
+\coordinate (d-4) at (0,-2);
+\coordinate (d-5) at (1,-2);
+\coordinate (d-6) at (-.5,-3);
+\coordinate (d-7) at (1.5,-3);
+\coordinate (d-8) at (0,-4);
+\coordinate (d-9) at (1,-4);
+\coordinate (d-10) at (2.5,-1);
+\coordinate (d-11) at (3,-2);
+\coordinate (d-12) at (2,-2);
+\coordinate (d-13) at (2.5,-3);
+
+\draw (d-0) -- (d-1) -- (d-3) -- (d-5) -- (d-4) -- (d-2) -- cycle;
+\draw (d-5) -- (d-7) -- (d-9) -- (d-8) -- (d-6) -- (d-4);
+\draw (d-3) -- (d-10) -- (d-11) -- (d-13) -- (d-7);
+\draw (d-3) -- (d-12) -- (d-7);
+
+\foreach \k in {0,...,13}
+\fill (d-\k) circle[radius=2pt];
+
+\end{scope}
+\end{tikzpicture}
+\end{center}
+
+\subsection*{Villages}
+
+In the villages, the dots on the maps represent houses and the edges are the routes he can fly between them (to avoid getting stuck in a tree).
+As he travels so quickly, he can't reuse a route because of the turbulence he creates.
+Can you find him a way around the village that visits each house once without going back over an individual route?
+
+\vfill
+
+\begin{center}
+\begin{tikzpicture}
+\begin{scope}
+\foreach[evaluate=\k as \nk using int(\k+4)] \k in {0,...,3}
+{
+  \coordinate (e-\k) at (90*\k:1);
+  \coordinate (e-\nk) at (90*\k:.5);
+  \fill (e-\k) circle[radius=2pt] (e-\nk) circle[radius=2pt];
+}
+
+\draw
+(e-0) -- (e-1) -- (e-2) -- (e-3) -- cycle
+(e-4) -- (e-5) -- (e-6) -- (e-7) -- cycle
+(e-0) -- (e-4)
+(e-1) -- (e-5)
+(e-2) -- (e-6)
+(e-3) -- (e-7)
+;
+\end{scope}
+\begin{scope}[shift={(4,0)}]
+\foreach[evaluate=\k as \nk using int(\k+3)] \k in {0,...,2}
+{
+  \coordinate (f-\k) at (120*\k:.5);
+  \coordinate (f-\nk) at (60+120*\k:1.5);
+  \fill (f-\k) circle[radius=2pt] (f-\nk) circle[radius=2pt];
+}
+\draw
+(f-0) -- (f-1) -- (f-2) -- cycle
+(f-3) -- (f-4) -- (f-5) -- cycle
+(f-0) -- (f-3) -- (f-1)
+(f-1) -- (f-4) -- (f-2)
+(f-2) -- (f-5) -- (f-0)
+;
+\end{scope}
+\begin{scope}[shift={(8,0)}]
+\colorlet{dodeca}{black}
+\colorlet{icosa}{black}
+\pic[
+  scale=.1,
+  every dodecahedral edge/.style={fill=none}
+] {dodecahedron};
+\end{scope}
+\end{tikzpicture}
+\end{center}
+
+\end{document}
