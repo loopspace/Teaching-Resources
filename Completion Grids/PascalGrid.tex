@@ -1,0 +1,135 @@
+\documentclass[12pt]{article}
+
+\thispagestyle{empty}
+\usepackage[scale=.95,landscape]{geometry}
+
+\usepackage{amsmath}
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\setmainfont{TeX Gyre Bonum}
+\setmathfont{TeX Gyre Bonum Math}
+
+\usepackage{tcolorbox}
+\usepackage{varwidth}
+
+\usepackage{tikz}
+\usetikzlibrary{
+  matrix,
+  matrix.skeleton,
+  decorations.pathreplacing,
+  calligraphy,
+  positioning,
+  arrows.meta,
+  calc,
+  fit,
+  tikzmark
+}
+
+\usepackage{siunitx}
+\usepackage{tikzpagenodes}
+
+\ExplSyntaxOn
+
+\seq_new:N \g__pascal_row_seq
+\seq_gput_right:Nn \g__pascal_row_seq {1}
+\prg_replicate:nn {9}
+{
+  \seq_gput_right:Nn \g__pascal_row_seq {0}
+}
+
+\seq_new:N \l__pascal_tmp_seq
+
+\DeclareDocumentCommand \PascalRow {s}
+{
+  \IfBooleanF {#1}
+  {
+    \seq_clear:N \l__pascal_tmp_seq
+    \seq_put_right:Nn \l__pascal_tmp_seq {1}
+    \int_step_inline:nnn {2} {\seq_count:N \g__pascal_row_seq}
+    {
+      \seq_put_right:Nx \l__pascal_tmp_seq
+      {
+        \int_eval:n {
+          \seq_item:Nn \g__pascal_row_seq {##1-1}
+          +
+          \seq_item:Nn \g__pascal_row_seq {##1}
+        }
+      }
+    }
+    \seq_gset_eq:NN \g__pascal_row_seq \l__pascal_tmp_seq
+  }
+  \seq_use:Nn \g__pascal_row_seq {\&}
+}
+
+\ExplSyntaxOff
+
+\tikzset{
+  >=Latex,
+  show cell/.style 2 args={
+    row #1 column #2/.style={
+      every node/.append style={text opacity=1}
+    },
+  },
+  current row/.initial=1,
+  step current row/.style={
+    current row/.expanded={\the\numexpr\pgfkeysvalueof{/tikz/current row}+1\relax}
+  },
+  show cell on current row/.style={
+    show cell={\pgfkeysvalueof{/tikz/current row}}{#1}
+  },
+  show cells/.style 2 args={
+    current row=#1,
+    show cell on current row/.list={#2}
+  },
+  show cells on next row/.style={
+    step current row,
+    show cell on current row/.list={#1}
+  }
+}
+
+\begin{document}
+
+\begin{center}
+\begin{tikzpicture}
+\matrix[
+  matrix of nodes,
+  ampersand replacement=\&,
+  nodes={inner xsep=2mm, minimum width=.8cm,
+    text opacity=0,
+    minimum height=1.1cm},
+%  row 1/.style={every node/.append style={font=\bfseries,text opacity=1}},
+  style odd tiling columns={fill=gray!25,rounded corners},
+  %
+  row 1/.style={every node/.append style={text opacity=1}},
+  %
+  current row=1,
+  show cells on next row={1,2,3},
+  show cells on next row={2,4},
+  show cells on next row={3},
+  show cells on next row={1,2,7},
+  show cells on next row={4,10},
+  show cells on next row={3,9},
+  show cells on next row={2,5,8},
+  show cells on next row={1,7},
+  show cells on next row={3,10},
+]
+(m)
+{
+  \PascalRow* \\
+  \PascalRow \\
+  \PascalRow \\
+  \PascalRow \\
+  \PascalRow \\
+  \PascalRow \\
+  \PascalRow \\
+  \PascalRow \\
+  \PascalRow \\
+  \PascalRow \\
+};
+
+\end{tikzpicture}
+\end{center}
+
+
+
+\end{document}

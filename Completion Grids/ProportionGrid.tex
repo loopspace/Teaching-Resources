@@ -1,0 +1,320 @@
+\documentclass{article}
+
+\thispagestyle{empty}
+\usepackage[landscape,scale=.95]{geometry}
+
+\usepackage{amsmath}
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\setmainfont{TeX Gyre Bonum}
+\setmathfont{TeX Gyre Bonum Math}
+
+\usepackage{varwidth}
+
+\usepackage{tikz}
+\usetikzlibrary{
+  matrix,
+  matrix.skeleton,
+  decorations.pathreplacing,
+  calligraphy,
+  positioning
+}
+
+
+\ExplSyntaxOn
+
+
+\tl_new:N \l__propto_tl
+\tl_new:N \l__rat_tmpa_tl
+
+\cs_new_eq:NN \rat_new:N \seq_new:N
+\cs_new_protected_nopar:Npn \rat_set_from_tl:Nn #1#2
+{
+  \seq_clear_new:N #1
+  \tl_if_in:nnTF {#2} {/}
+  {
+    \seq_set_split:Nnn #1 {/} {#2}
+  }
+  {
+    \seq_put_right:Nn #1 {#2}
+    \seq_put_right:Nn #1 {1}
+  }
+  \seq_pop_left:NN #1 \l__rat_tmpa_tl
+  \int_compare:nTF {\l__rat_tmpa_tl < 0}
+  {
+    \seq_put_left:Nx #1 {\int_eval:n {-1 * (\l__rat_tmpa_tl)}}
+    \seq_put_left:Nn #1 {-1}
+  }
+  {
+    \seq_put_left:NV #1 \l__rat_tmpa_tl
+    \seq_put_left:Nn #1 {1}
+  }
+}
+
+\cs_new_nopar:Npn \rat_numerator:N #1
+{
+  \seq_item:Nn #1 {2}
+}
+\cs_new_nopar:Npn \rat_denominator:N #1
+{
+  \seq_item:Nn #1 {3}
+}
+\cs_new_nopar:Npn \rat_sign:N #1
+{
+  \seq_item:Nn #1 {1}
+}
+
+\cs_new_nopar:Npn \coefficient:n #1
+{
+  \int_case:nnF {#1}
+  {
+    {-1} {-}
+    {1} {}
+  }
+  {#1}
+}
+\cs_generate_variant:Nn \coefficient:n {V,x}
+
+\DeclareDocumentCommand \PropStatement {m m m m}
+{
+  \prop_statement:nnnnn {#1}{#2}{1}{#4}{\propto}
+}
+\DeclareDocumentCommand \PropFormula {m m m m}
+{
+  \prop_statement:nnnnn {#1}{#2}{#3}{#4}{=}
+}
+
+
+\int_new:N \l__propto_switch_int
+\DeclareDocumentCommand \PropSentence {m m m m}
+{
+  \int_set:Nn \l__propto_switch_int {\int_rand:n {2}}
+  \rat_set_from_tl:Nn \l__pow_rat {#4}
+  \(#2\)~
+  \int_compare:nTF {\l__propto_switch_int == 1}
+  {
+    is~
+  }
+  {
+    varies~
+  }
+  \int_compare:nT {\rat_sign:N \l__pow_rat == -1}
+  {
+    inversely~
+  }
+  \int_compare:nTF {\l__propto_switch_int == 1}
+  {
+    proportional~ to~
+  }
+  {
+    with~
+  }
+  \int_case:nnF {\rat_denominator:N \l__pow_rat}
+  {
+    {1} {}
+    {2} {the~ square~ root~ of~}
+    {3} {the~ cube~ root~ of~}
+  }
+  {
+    the~ \(\rat_numerator:N \l__pow_rat\)\Ordinal{\rat_numerator:N \l__pow_rat}~ root~ of~
+  }
+  \int_case:nnF {\rat_numerator:N \l__pow_rat}
+  {
+    {1} {}
+    {2} {the~ square~ of~}
+    {3} {the~ cube~ of~}
+  }
+  {
+    the~ \(\rat_numerator:N \l__pow_rat\)\Ordinal{\rat_numerator:N \l__pow_rat}~ power~ of~
+  }
+  \(#1\)
+}
+
+\rat_new:N \l__pow_rat
+\rat_new:N \l__coeff_rat
+\tl_new:N \l__propto_num_tl
+\tl_new:N \l__propto_den_tl
+\tl_new:N \l__propto_exp_tl
+
+\cs_new_protected_nopar:Npn \prop_statement:nnnnn #1#2#3#4#5
+{
+  \rat_set_from_tl:Nn \l__pow_rat {#4}
+  \rat_set_from_tl:Nn \l__coeff_rat {#3}
+  #2 #5
+
+  \tl_clear:N \l__propto_num_tl
+  \tl_clear:N \l__propto_den_tl
+  \tl_clear:N \l__propto_exp_tl
+
+  
+  \int_compare:nT {\rat_denominator:N \l__pow_rat > 1}
+  {
+    \tl_put_right:Nn \l__propto_exp_tl {\sqrt}
+  }
+  \int_compare:nT {\rat_denominator:N \l__pow_rat > 2}
+  {
+    \tl_put_right:Nn \l__propto_exp_tl {[\rat_denominator:N \l__pow_rat]}
+  }
+  \tl_put_right:Nn \l__propto_exp_tl
+  {
+    {
+      #1
+      \int_compare:nT {\rat_numerator:N \l__pow_rat > 1}
+      {
+        ^{\rat_numerator:N \l__pow_rat}
+      }
+    }
+  }
+  
+  \int_compare:nTF {\rat_sign:N \l__pow_rat == -1}
+  {
+    \tl_put_right:Nx \l__propto_num_tl {\rat_numerator:N \l__coeff_rat}
+    \tl_put_right:Nx \l__propto_den_tl {\coefficient:n {\rat_denominator:N \l__coeff_rat}}
+    \tl_put_right:NV \l__propto_den_tl \l__propto_exp_tl
+  }
+  {
+    \tl_put_right:Nx \l__propto_num_tl {\coefficient:n {\rat_numerator:N \l__coeff_rat}}
+    \tl_put_right:Nx \l__propto_den_tl {\rat_denominator:N \l__coeff_rat}
+    \tl_put_right:NV \l__propto_num_tl \l__propto_exp_tl
+  }
+
+  
+  \int_compare:nT {\rat_sign:N \l__coeff_rat == -1} {-}
+  \tl_if_eq:NnTF \l__propto_den_tl {1}
+  {
+    \tl_use:N \l__propto_num_tl
+  }
+  {
+    \frac{ \tl_use:N \l__propto_num_tl} {\tl_use:N \l__propto_den_tl}
+  }
+
+}
+
+\DeclareDocumentCommand \PropValueAt {m m m}
+{
+  \fp_eval:n {(#1) * (#3)^(#2)}
+}
+
+\cs_new_eq:NN \ampersand \&
+
+\ExplSyntaxOff
+
+%%   \(1\)st\&
+%%   \(2\)nd\&
+%%   \begin{varwidth}{1in}Proportionality\\statement\end{varwidth} \&
+%%   \begin{varwidth}{1in}Constant of\\proportionality\end{varwidth} \&
+%%   Formula \&
+%%   \(1\)st \&
+%%   \(2\)nd \&
+%%   \(1\)st \&
+%%   \(2\)nd \\
+
+% y = k x^n
+% x = #1
+% y = #2
+% k = #3
+% n = #4
+% 1st pt = #5
+% 2nd pt = #6
+\NewDocumentCommand\PropRow {m m m m m m}
+{
+  \(#1\) \&
+  \(#2\) \&
+  \begin{varwidth}{2in}\PropSentence{#1}{#2}{#3}{#4}\end{varwidth} \&
+  \(\PropStatement{#1}{#2}{#3}{#4}\) \&
+  \(#3\) \&
+  \(\PropFormula{#1}{#2}{#3}{#4}\) \&
+  \(#5\) \&
+  \(\PropValueAt{#3}{#4}{#5}\) \&
+  \(#6\) \&
+  \(\PropValueAt{#3}{#4}{#6}\)
+}
+
+\tikzset{
+  show cell/.style 2 args={
+    row #1 column #2/.style={
+      every node/.append style={text opacity=1}
+    },
+  },
+  current row/.initial=1,
+  show cell on current row/.style={
+    show cell={\pgfkeysvalueof{/tikz/current row}}{#1}
+  },
+  show cells/.style 2 args={
+    current row=#1,
+    show cell on current row/.list={#2}
+  },
+  column header/.style={
+    above=1ex,
+    font=\bfseries
+  }
+}
+
+\begin{document}
+
+\vspace*{\fill}
+
+\begin{tikzpicture}
+\matrix[
+  matrix of nodes,
+  ampersand replacement=\&,
+  nodes={
+    inner xsep=2mm,
+    minimum width=.8cm,
+    minimum height=1.1cm,
+    text opacity=0,
+  },
+  row 1/.style={every node/.append style={font=\bfseries,text opacity=1}},
+  style odd tiling columns={fill=gray!25,rounded corners},
+  %
+  row 2/.style={every node/.append style={text opacity=1}},
+  %
+  show cells={3}{1,2,3,7,8,9},
+  show cells={4}{1,2,4,7,8,9},
+  show cells={5}{1,2,3,7,8,10},
+  show cells={6}{1,2,4,7,8,10},
+  show cells={7}{1,2,7,8,9,10},
+]
+(m)
+{
+  \(1\)st\&
+  \(2\)nd\&
+  \begin{varwidth}{2in}Proportionality\\sentence\end{varwidth} \&
+  \begin{varwidth}{2in}Proportionality\\statement\end{varwidth} \&
+  \begin{varwidth}{2in}Constant of\\proportionality\end{varwidth} \&
+  Formula \&
+  \(1\)st \&
+  \(2\)nd \&
+  \(1\)st \&
+  \(2\)nd \&
+  \\
+  %
+  \PropRow{x}{y}{8}{1}{5}{12}  \\ % 2
+  \PropRow{s}{t}{3}{1}{2}{7}  \\ % 3
+  \PropRow{p}{q}{36}{-1}{5}{12}  \\ % 4
+  \PropRow{u}{v}{2}{1/2}{25}{144}  \\ % 5
+  \PropRow{f}{g}{3/4}{-1/3}{8}{27}  \\ % 6
+  \PropRow{x}{y}{3/5}{-3/2}{4}{25}  \\ % 7
+};
+
+\draw[
+  decorate,
+  decoration={calligraphic brace,amplitude=1ex},
+  ultra thick
+] (m-tiling-cell-1-1.north west) -- node[column header] {Quantities} (m-tiling-cell-1-2.north east);
+\draw[
+  decorate,
+  decoration={calligraphic brace,amplitude=1ex},
+  ultra thick
+] (m-tiling-cell-1-7.north west) -- node[column header] {Values} (m-tiling-cell-1-8.north east);
+\draw[
+  decorate,
+  decoration={calligraphic brace,amplitude=1ex},
+  ultra thick
+] (m-tiling-cell-1-9.north west) -- node[column header] {Values} (m-tiling-cell-1-10.north east);
+\end{tikzpicture}
+
+\vspace*{\fill}
+
+
+\end{document}

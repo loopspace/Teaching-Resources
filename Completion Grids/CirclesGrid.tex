@@ -1,0 +1,177 @@
+\documentclass[12pt]{article}
+
+\thispagestyle{empty}
+\usepackage[scale=.95]{geometry}
+
+\usepackage{amsmath}
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\setmainfont{TeX Gyre Bonum}
+\setmathfont{TeX Gyre Bonum Math}
+
+\usepackage{tcolorbox}
+\usepackage{varwidth}
+
+\usepackage{tikz}
+\usetikzlibrary{
+  matrix,
+  matrix.skeleton,
+  decorations.pathreplacing,
+  calligraphy,
+  positioning,
+  arrows.meta,
+  calc,
+  fit,
+  tikzmark
+}
+
+\usepackage{siunitx}
+\usepackage{tikzpagenodes}
+
+\ExplSyntaxOn
+\cs_new_protected_nopar:Npn \circle_row:nn #1#2
+{
+  \(\ang{\int_eval:n{#1}}\) \&
+  \(\ang{\int_eval:n{#2}}\) \&
+  \(\ang{\int_eval:n {#1+#2}}\) \&
+  \(\ang{\int_eval:n{#1}}\) \&
+  \(\ang{\int_eval:n{#2}}\) \&
+  \(\ang{\int_eval:n {180-2*#1}}\) \&
+  \(\ang{\int_eval:n {180-2*#2}}\) \&
+  \(\ang{\int_eval:n {2*#1}}\) \&
+  \(\ang{\int_eval:n {2*#2}}\) \&
+  \(\ang{\int_eval:n {2*#1+2*#2}}\)
+}
+\cs_generate_variant:Nn \circle_row:nn {VV}
+
+\int_new:N \l__circle_random_a_int
+\int_new:N \l__circle_random_b_int
+\DeclareDocumentCommand \RandomCircleRow { m }
+{
+  \int_set:Nn \l__circle_random_a_int {\int_rand:n {90/#1-1} * #1}
+  \int_set:Nn \l__circle_random_b_int {\int_rand:n {90/#1-1} * #1}
+  \circle_row:VV \l__circle_random_a_int \l__circle_random_b_int
+}
+\DeclareDocumentCommand \CircleRow {m m}
+{
+  \circle_row:nn {#1}{#2}
+}
+
+\ExplSyntaxOff
+
+\tikzset{
+  >=Latex,
+  show cell/.style 2 args={
+    row #1 column #2/.style={
+      every node/.append style={text opacity=1}
+    },
+  },
+  current row/.initial=1,
+  step current row/.style={
+    current row/.expanded={\the\numexpr\pgfkeysvalueof{/tikz/current row}+1\relax}
+  },
+  show cell on current row/.style={
+    show cell={\pgfkeysvalueof{/tikz/current row}}{#1}
+  },
+  show cells/.style 2 args={
+    current row=#1,
+    show cell on current row/.list={#2}
+  },
+  show cells on next row/.style={
+    step current row,
+    show cell on current row/.list={#1}
+  }
+}
+
+\begin{document}
+
+\begin{center}
+\begin{tikzpicture}
+\coordinate (O) at (0,0);
+\coordinate (A) at (23:3cm);
+\coordinate (B) at (140:3cm);
+\coordinate (C) at (-113:3cm);
+\coordinate (D) at (203:3cm);
+\draw (0,0) circle[radius=3cm];
+\draw (D) -- (A) -- (B) -- (O) -- (C) -- (A);
+\foreach \k/\anch in {%
+  O/below right,
+  A/above right,
+  B/above left,
+  C/below left,
+  D/below left%
+} {
+  \fill (\k) circle[radius=3pt];
+  \node[\anch] at (\k) {\(\k\)};
+}
+\end{tikzpicture}
+\end{center}
+
+
+\begin{center}
+\begin{tikzpicture}
+\matrix[
+  matrix of nodes,
+  ampersand replacement=\&,
+  nodes={inner xsep=2mm, minimum width=.8cm,
+    text opacity=0,
+    minimum height=1.1cm},
+  row 1/.style={every node/.append style={font=\bfseries,text opacity=1}},
+  style odd tiling columns={fill=gray!25,rounded corners},
+  %
+  row 2/.style={every node/.append style={text opacity=1}},
+  %
+  current row=2,
+  show cells on next row={1,2},
+  show cells on next row={1,2},
+  show cells on next row={1,2},
+  show cells on next row={6,2},
+  show cells on next row={6,2},
+  show cells on next row={8,9},
+  show cells on next row={8,9},
+  show cells on next row={2,10},
+  show cells on next row={2,10},
+  show cells on next row={3},
+  show cells on next row={3},
+  show cells on next row={10},
+  show cells on next row={10},
+  show cells on next row={3},
+  show cells on next row={10},
+]
+(m)
+{
+  \(O\hat{A}B\) \&
+  \(O\hat{A}C\) \&
+  \(B\hat{A}C\) \&
+  \(O\hat{B}A\) \&
+  \(O\hat{C}A\) \&
+  \(B\hat{O}A\) \&
+  \(C\hat{O}A\) \&
+  \(D\hat{O}B\) \&
+  \(D\hat{O}C\) \&
+  \(B\hat{O}C\) \\
+  %
+  \CircleRow{30}{20} \\
+  \RandomCircleRow{10} \\
+  \RandomCircleRow{5} \\
+  \RandomCircleRow{1} \\
+  \RandomCircleRow{5} \\
+  \RandomCircleRow{1} \\
+  \RandomCircleRow{5} \\
+  \RandomCircleRow{1} \\
+  \RandomCircleRow{5} \\
+  \RandomCircleRow{1} \\
+  \RandomCircleRow{5} \\
+  \RandomCircleRow{1} \\
+  \RandomCircleRow{5} \\
+  \RandomCircleRow{1} \\
+  \RandomCircleRow{1} \\
+  \RandomCircleRow{1} \\
+};
+
+\end{tikzpicture}
+\end{center}
+
+
+
+\end{document}
