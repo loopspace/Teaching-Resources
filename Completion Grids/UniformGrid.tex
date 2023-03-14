@@ -25,6 +25,13 @@
   tikzmark
 }
 
+% Variance = 1/n \sum k^2 - (1/n \sum k)^2
+% = 1/n ( n(n+1)(2n+1)/6 ) - (1/n n(n+1)/2)^2
+% = (n+1)(2n+1)/6 - (n+1)^2/4
+% = (n+1)( 2(2n+1) - 3(n+1) )/12
+% = (n+1)(4n + 2 - 3n - 3) /12
+% = (n+1)(n-1)/12
+
 \usepackage{siunitx}
 \usepackage{tikzpagenodes}
 
@@ -41,7 +48,7 @@
   \(\int_eval:n {#1}\) \&
   \(X \sim U(\int_eval:n {#1})\) \&
   \( \rat_display:n {1,#1+1,2} \) \&
-  \( \rat_display:n {1,(#1+1)*(2*#1+1),6} \) \&
+  \( \rat_display:n {1,(#1+1)*(#1-1),12} \) \&
   \(\int_eval:n {#2}\) \&
   \(\frac{1}{\int_eval:n {#1}}\) \&
   \( \int_compare:nTF {#2 = 1} {0} { \rat_display:n {1,#2-1,#1} } \) \&
