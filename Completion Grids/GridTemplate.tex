@@ -1,0 +1,94 @@
+\documentclass[12pt]{article}
+
+\thispagestyle{empty}
+\usepackage[scale=.95,landscape]{geometry}
+
+\usepackage{amsmath}
+
+% Font declarations
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\setmainfont{TeX Gyre Bonum}
+\setmathfont{TeX Gyre Bonum Math}
+
+\usepackage{tcolorbox}
+\usepackage{varwidth}
+
+\usepackage{tikz}
+\usetikzlibrary{
+  matrix,
+  matrix.skeleton,
+  decorations.pathreplacing,
+  calligraphy,
+  positioning,
+  arrows.meta,
+  calc,
+  fit,
+  tikzmark
+}
+
+\usepackage{siunitx}
+\usepackage{tikzpagenodes}
+
+%\usepackage{rational} % <- If dealing with rational numbers
+
+\tikzset{
+  >=Latex,
+  show cell/.style 2 args={
+    row #1 column #2/.style={
+      every node/.append style={text opacity=1}
+    },
+  },
+  current row/.initial=1,
+  step current row/.style={
+    current row/.expanded={%
+      \the\numexpr\pgfkeysvalueof{/tikz/current row}+1\relax%
+    }
+  },
+  show cell on current row/.style={
+    show cell={\pgfkeysvalueof{/tikz/current row}}{#1}
+  },
+  show cells/.style 2 args={
+    current row=#1,
+    show cell on current row/.list={#2}
+  },
+  show cells on next row/.style={
+    step current row,
+    show cell on current row/.list={#1}
+  }
+}
+
+\begin{document}
+
+\begin{center}
+\begin{tikzpicture}
+\matrix[
+  matrix of nodes,
+  ampersand replacement=\&,
+  nodes={
+    inner xsep=2mm,
+    minimum width=.8cm,
+    text opacity=0, % <- comment out this line to show all cells
+    minimum height=1.1cm
+  },
+  row 1/.style={ % <- header row style
+    every node/.append style={
+      font=\bfseries,text opacity=1
+    }
+  },
+  % alternating columns
+  style odd tiling columns={fill=gray!25,rounded corners},
+  % show second row as an example
+  row 2/.style={every node/.append style={text opacity=1}},
+  % 
+  current row=2,
+  show cells on next row={1,5}, % <- to show cells on each row
+]
+(m)
+{
+  % <- rows go here
+};
+\end{tikzpicture}
+\end{center}
+
+\end{document}
