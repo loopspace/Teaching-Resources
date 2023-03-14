@@ -1,0 +1,114 @@
+\ProvidesExplPackage {rational} {2023/03/13} {0.1} {Rational Numbers}
+
+\cs_new_eq:NN \rat_new:N \seq_new:N
+\cs_new_eq:NN \rat_clear_new:N \seq_clear_new:N
+
+
+\tl_new:N \l__rat_tmpa_tl
+\int_new:N \l__rat_tmpc_int
+\rat_new:N \l__rat_tmpa_rat
+\rat_new:N \l__rat_tmpb_rat
+
+
+\cs_new_protected_nopar:Npn \rat_set_from_tl:Nn #1#2
+{
+  \seq_clear_new:N #1
+  \tl_if_in:nnTF {#2} {/}
+  {
+    \seq_set_split:Nnn #1 {/} {#2}
+  }
+  {
+    \seq_put_right:Nn #1 {#2}
+    \seq_put_right:Nn #1 {1}
+  }
+  \seq_pop_left:NN #1 \l__rat_tmpa_tl
+  \int_compare:nTF {\l__rat_tmpa_tl < 0}
+  {
+    \seq_put_left:Nx #1 {\int_eval:n {-1 * (\l__rat_tmpa_tl)}}
+    \seq_put_left:Nn #1 {-1}
+  }
+  {
+    \seq_put_left:NV #1 \l__rat_tmpa_tl
+    \seq_put_left:Nn #1 {1}
+  }
+}
+
+\cs_new_protected_nopar:Npn \rat_set_from_clist:Nn #1#2
+{
+  \seq_clear_new:N #1
+  \seq_put_right:Nx #1 {\int_eval:n {\clist_item:nn {#2} {1}}}
+  \seq_put_right:Nx #1 {\int_eval:n {\clist_item:nn {#2} {2}}}
+  \seq_put_right:Nx #1 {\int_eval:n {\clist_item:nn {#2} {3}}}
+}
+
+\cs_generate_variant:Nn \rat_set_from_clist:Nn {NV}
+
+\cs_new_protected_nopar:Npn \rat_set_from_clist:NN #1#2
+{
+  \rat_set_from_clist:NV #1#2
+}
+
+\cs_new_nopar:Npn \rat_numerator:N #1
+{
+  \seq_item:Nn #1 {2}
+}
+\cs_new_nopar:Npn \rat_denominator:N #1
+{
+  \seq_item:Nn #1 {3}
+}
+\cs_new_nopar:Npn \rat_sign:N #1
+{
+  \seq_item:Nn #1 {1}
+}
+
+\cs_new_protected_nopar:Npn \rat_reduce:NN #1#2
+{
+  \rat_clear_new:N #1
+  \seq_put_right:Nx #1 {\rat_sign:N #2}
+  \rat_gcd:Nnn \l__rat_tmpc_int {\rat_numerator:N #2}{\rat_denominator:N #2}
+  \seq_put_right:Nx #1 {\int_eval:n { (\rat_numerator:N #2) / \l__rat_tmpc_int}}
+  \seq_put_right:Nx #1 {\int_eval:n { (\rat_denominator:N #2) / \l__rat_tmpc_int}}
+}
+
+\cs_new_protected_nopar:Npn \rat_display:N #1
+{
+  \int_compare:nTF {\rat_numerator:N #1 == 0} {0}
+  {
+    \rat_reduce:NN \l__rat_tmpa_rat #1
+    \int_compare:nT {\rat_sign:N #1 == -1} {-}
+    \int_compare:nTF {\rat_denominator:N \l__rat_tmpa_rat == 1}
+    {
+      \rat_numerator:N \l__rat_tmpa_rat
+    }
+    {
+      \frac{
+        \rat_numerator:N \l__rat_tmpa_rat
+      }{
+        \rat_denominator:N \l__rat_tmpa_rat
+      }
+    }
+  }
+}
+
+\cs_new_protected_nopar:Npn \rat_display:n #1
+{
+  \rat_set_from_clist:Nn \l__rat_tmpb_rat {#1}
+  \rat_display:N \l__rat_tmpb_rat
+}
+
+\cs_new_nopar:Npn \rat_gcd:Nnn #1#2#3
+{
+  \int_compare:nNnTF {#2} > {#3}
+  {\__rat_gcd:Nnn #1 {#2} {#3}}
+  {\__rat_gcd:Nnn #1 {#3} {#2}}
+}
+
+\cs_new_nopar:Npn \__rat_gcd:Nnn #1#2#3
+{
+  \int_compare:nNnTF {#3} = {0}
+  {\int_set:Nn #1 {#2}} {
+    \rat_gcd:Nxn #1 {\int_eval:n {#2-#3}}{#3}
+  }
+}
+
+\cs_generate_variant:Nn \rat_gcd:Nnn {Nxn, NVV}
