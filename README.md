@@ -16,3 +16,11 @@
 * Large Christmas Data: Various data sets that draw Christmassy pictures when
   plotted
 * Santa's Trip: A couple of graph theory puzzles with a Christmas theme
+
+## Other Activities
+
+* Polygons: drawings of regular polygons from 3-sides to 14-sides
+  showing internal and external angles.
+* Word Ladders: word ladder questions typeset nicely, these particular
+  ones are designed to lead a student through word ladder puzzles from
+  straightforward ones to more complicated.
