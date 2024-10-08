@@ -1,5 +1,21 @@
 # Teaching Resources
 
+## Completion Grids
+
+These are all "completion grids" in which there are rows to complete
+with different information in each one.
+
+* Circles: Completion grids for "angle at centre is twice angle at
+  circumference" and "alternate segment theorem"
+* Quadratics: different forms, value at different points, coordinates
+  of vertex
+* Pascal's Triangle
+* Sequences: linear/arithmetic sequences
+* Decimals: converting recurring decimals to fractions
+* Proportion: different types of proportion
+* Probability: uniform distribution
+
+
 ## Christmas Activities
 
 * Christmas Constructions: Construct a Christmas tree with ruler and compass
