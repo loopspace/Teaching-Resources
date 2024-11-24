@@ -40,3 +40,5 @@ with different information in each one.
 * Word Ladders: word ladder questions typeset nicely, these particular
   ones are designed to lead a student through word ladder puzzles from
   straightforward ones to more complicated.
+* Sudokus: six 6x6 sudokus, three of which work and three of which
+  don't - designed as part of an exercise in spotting errors.

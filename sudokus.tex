@@ -1,0 +1,150 @@
+\documentclass{article}
+
+\usepackage[scale=.8]{geometry}
+
+\parindent=0pt
+
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\setmainfont{TeX Gyre Bonum}
+\setmathfont{TeX Gyre Bonum Math}
+
+\pagestyle{empty}
+
+\usepackage{multicol}
+
+\usepackage{tikz}
+\usetikzlibrary{matrix}
+
+\ExplSyntaxOn
+
+\tl_new:N \l__sudoku_matrix_tl
+
+\cs_new_protected_nopar:Npn \sudoku_parse:n #1
+{
+  \tl_clear:N \l__sudoku_matrix_tl
+  \tl_set:Nn \l__sudoku_tl {#1}
+  \tl_trim_spaces:N \l__sudoku_tl
+  \tl_replace_all:Nnn \l__sudoku_tl {~} {\\}
+  \tl_map_inline:Nn \l__sudoku_tl
+  {
+    \tl_if_eq:nnF {##1} {.}
+    {
+      \tl_put_right:Nn \l__sudoku_matrix_tl
+      {
+        ##1
+      }
+    }
+    \tl_if_eq:nnF {##1} {\\}
+    {
+      \tl_put_right:Nn \l__sudoku_matrix_tl {\&}
+    }
+  }
+  \tl_put_right:Nn \l__sudoku_matrix_tl {\\}
+}
+
+\cs_new_protected_nopar:Npn \sudoku_layout:n #1
+{
+  \begin{tikzpicture}
+  \draw (0,0) grid ++(6,6);
+  \draw[ultra~ thick] (0,0) grid[xstep=3cm, ystep=2cm] ++(6,6);
+  \matrix[
+    matrix~ of~ math~ nodes,
+    nodes~ in~ empty~ cells,
+    ampersand~ replacement=\&,
+    every~ node/.style={anchor=center,minimum~ size=1cm,font=\Large}
+  ] at (3.5,3) {
+    #1
+  };
+  \end{tikzpicture}
+}
+
+\cs_generate_variant:Nn \sudoku_layout:n {V}
+
+\DeclareDocumentCommand \Sudoku {m}
+{
+  \sudoku_parse:n {#1}
+  \sudoku_layout:V \l__sudoku_matrix_tl
+}
+
+
+\ExplSyntaxOff
+
+
+
+
+\begin{document}
+
+\begin{multicols}{2}
+
+\section*{Sudokus That Work}
+
+\Sudoku{%
+  .1...4
+  42..63
+  ......
+  ...32.
+  .6....
+  2..41.
+}
+
+\vspace*{1cm}
+
+\Sudoku{
+  ...3.5
+  1.....
+  .2..6.
+  4.32..
+  ....2.
+  ..25..
+}
+
+\vspace*{1cm}
+
+
+\Sudoku{
+  ....1.
+  ....4.
+  5.1...
+  ..325.
+  ..412.
+  6....4
+}
+
+
+\section*{Sudokus That Don't}
+
+\Sudoku{
+  24...5
+  .3.6..
+  ..1...
+  4...6.
+  ....26
+  .1..3.
+}
+
+\vspace*{1cm}
+
+\Sudoku{
+  6.4..2
+  .5.6..
+  1.6..4
+  ......
+  4.2.3.
+  ....21
+}
+
+\vspace*{1cm}
+
+\Sudoku{
+  ...1.6
+  .32...
+  2.1.5.
+  5.....
+  .....3
+  .2.6..
+}
+
+\end{multicols}
+
+\end{document}
