@@ -1,0 +1,648 @@
+\documentclass{article}
+\usepackage[scale=.9]{geometry}
+\thispagestyle{empty}
+\pagestyle{empty}
+
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\setmainfont{TeX Gyre Adventor}
+\setmathfont{TeX Gyre Bonum Math}
+
+\usepackage{xparse}
+
+\usepackage{siunitx}
+\usepackage{tikz}
+
+\usepackage{pgfmorepages}
+\pgfmorepagesloadextralayouts
+\pgfpagesuselayout{repeated 2-up}
+
+
+\DeclareDocumentCommand \Typeset {m}
+{%
+  \pgfmathparse{#1}\pgfmathprintnumber{\pgfmathresult}%
+}
+
+\newcounter{side}
+\renewcommand\theside{\alph{side}\stepcounter{side}}
+\setcounter{side}{1}
+\newcounter{qn}
+\renewcommand\theqn{\arabic{qn}.\stepcounter{qn}}
+\setcounter{qn}{1}
+
+\newif\ifusedegrees
+\newif\ifsolvetriangle
+
+\tikzset{
+  use degrees/.is if=usedegrees,
+  use degrees=true,
+  solve triangle/.is if=solvetriangle,
+  solve triangle=false,
+  triangle/.pic={
+    \pgfkeys{/pgf/number format/.cd,fixed,precision=3}
+    \pgfmathsetmacro\cosx{cos(#1)}
+    \pgfmathsetmacro\sinx{sin(#1)}
+    \draw (0,0) -| node[pos=.25,auto,swap] {\(\pgfmathprintnumber{\cosx}\)} node[pos=.75,auto,swap] {\(\pgfmathprintnumber{\sinx}\)} (4,3) -- node[auto,pos=.5,swap] {\(1\)} (0,0) ;
+    \draw (4,0) +(-.5,0) |- +(0,.5);
+    \clip (0,0) -| (4,3) -- cycle;
+    \draw (0,0) circle[radius=.5];
+    \node at (1,.375) {\(\ifusedegrees\pgfmathprintnumber[precision=0]{#1}^\circ\else\pgfmathprintnumber[precision=0]{#1}\fi\)};
+  },
+  pics/set triangle question/.style n args={4}{
+    code={
+      \pgfkeys{/pgf/number format/.cd,fixed,precision=3}
+      \begin{scope}
+      \clip (0,0) -| (4,3) -- cycle;
+      \draw (0,0) circle[radius=.5];
+      \end{scope}
+      \node[right] at (.7,.375) {\(\ifusedegrees{#1}^\circ\else{#1}\fi\)};
+      \draw (0,0) -| node[pos=.25,auto,swap] {\(#2\)} node[pos=.75,auto,swap] {\(#3\)} (4,3) -- node[auto,pos=.5,swap] {\(#4\)} (0,0) ;
+    \draw (4,0) +(-.5,0) |- +(0,.5);
+      \node at (0,3) {\theqn};
+    }
+  },
+  pics/solve triangle question/.style n args={4}{
+  	code={
+  	\SolveTriangle{#1}{#2}{#3}{#4}
+  	}
+  },
+  pics/triangle question/.style n args={4}{
+  code={
+    \ifsolvetriangle
+  	\SolveTriangle{#1}{#2}{#3}{#4}
+  	\else
+  	\pic{set triangle question={#1}{#2}{#3}{#4}};
+  	\fi
+  	}
+  }
+}
+
+\ExplSyntaxOn
+
+\tl_new:N \l_triangle_tl
+
+% Naming scheme: angle, adjacent, opposite, hypotenuse
+% `p` means `present`
+% `a` means `absent`
+
+\int_new:N \l_inner_precision_int
+\int_set:Nn \l_inner_precision_int {3}
+\tikzset{
+  triangle~ precision/.is~ choice,
+  triangle~ precision/full/.code={
+  \int_set:Nn \l_inner_precision_int {12}
+  },
+  triangle~ precision/low/.code={
+  \int_set:Nn \l_inner_precision_int {3}
+  }
+}
+
+\cs_new:Npn \triangle_paap:Nnnnn #1#2#3#4#5
+{
+  \tl_set:Nx #1
+  {
+    {\exp_not:n {#2}}
+     {\exp_not:n {#3} = \fp_eval:n { round( (#5) * round( cosd( #2), \l_inner_precision_int, 1) , 3, 1)} }
+     {\exp_not:n {#4} = \fp_eval:n { round( (#5) * round( sind( #2), \l_inner_precision_int, 1) , 3, 1)} }
+    {\exp_not:n {#5}}
+  }
+}
+\cs_new:Npn \triangle_ppaa:Nnnnn #1#2#3#4#5
+{
+  \tl_set:Nx #1
+  {
+    {\exp_not:n {#2}}
+    {\exp_not:n {#3}}
+     {\exp_not:n {#4} = \fp_eval:n { round( (#3) * round( sind( #2), \l_inner_precision_int, 1)/round( cosd( #2), \l_inner_precision_int, 1) , 3, 1)} }
+     {\exp_not:n {#5} = \fp_eval:n { round( (#3) / round( cosd( #2), \l_inner_precision_int, 1) , 3, 1)} }
+  }
+}
+\cs_new:Npn \triangle_papa:Nnnnn #1#2#3#4#5
+{
+  \tl_set:Nx #1
+  {
+    {\exp_not:n {#2}}
+     {\exp_not:n {#3} = \fp_eval:n { round( (#4) * round( cosd( #2), \l_inner_precision_int, 1) / round( sind( #2), \l_inner_precision_int, 1) , 3, 1)} }
+    {\exp_not:n {#4}}
+     {\exp_not:n {#5} = \fp_eval:n { round( (#4) / round( sind( #2), \l_inner_precision_int, 1) , 3, 1)} }
+  }
+}
+\cs_new:Npn \triangle_aapp:Nnnnn #1#2#3#4#5
+{
+  \tl_set:Nx #1
+  {
+    {\exp_not:n {#2} = \fp_eval:n { round( asind((#4)/(#5)) ,3,1)}}
+     {\exp_not:n {#3} = \fp_eval:n { round( sqrt( (#5)^2 - (#4)^2) , 3, 1)} }
+    {\exp_not:n {#4}}
+    {\exp_not:n {#5}}
+  }
+}
+\cs_new:Npn \triangle_apap:Nnnnn #1#2#3#4#5
+{
+  \tl_set:Nx #1
+  {
+    {\exp_not:n {#2} = \fp_eval:n { round( acosd((#3)/(#5)) ,3,1)}}
+    {\exp_not:n {#3}}
+     {\exp_not:n {#4} = \fp_eval:n { round( sqrt( (#5)^2 - (#3)^2) , 3, 1)} }
+    {\exp_not:n {#5}}
+  }
+}
+\cs_new:Npn \triangle_appa:Nnnnn #1#2#3#4#5
+{
+  \tl_set:Nx #1
+  {
+    {\exp_not:n {#2} = \fp_eval:n { round( atand((#4)/(#3)) ,3,1)}}
+    {\exp_not:n {#3}}
+    {\exp_not:n {#4}}
+     {\exp_not:n {#5} = \fp_eval:n { round( sqrt( (#3)^2 + (#4)^2) , 3, 1)} }
+  }
+}
+
+\cs_set_eq:NN \typeset_orig:n \Typeset
+\tl_new:N \degrees
+\DeclareDocumentCommand \SolveTriangle { m m m m }
+{
+\tl_clear:N \l_triangle_tl
+\tl_put_right:Nn \l_triangle_tl {triangle_}
+\tl_if_eq:nnTF {#1} {\theside}
+{\tl_put_right:Nn \l_triangle_tl {a}}
+{\tl_put_right:Nn \l_triangle_tl {p}}
+\tl_if_eq:nnTF {#2} {\theside}
+{\tl_put_right:Nn \l_triangle_tl {a}}
+{\tl_put_right:Nn \l_triangle_tl {p}}
+\tl_if_eq:nnTF {#3} {\theside}
+{\tl_put_right:Nn \l_triangle_tl {a}}
+{\tl_put_right:Nn \l_triangle_tl {p}}
+\tl_if_eq:nnTF {#4} {\theside}
+{\tl_put_right:Nn \l_triangle_tl {a}}
+{\tl_put_right:Nn \l_triangle_tl {p}}
+\tl_put_right:Nn \l_triangle_tl {:Nnnnn}
+\cs_set_eq:NN \Typeset \use:n
+\tl_set:Nn \degrees{ \c_one_degree_fp }
+\use:c { \tl_use:N \l_triangle_tl } \l_triangle_tl {#1}{#2}{#3}{#4}
+\tl_clear:N \degrees
+\cs_set_eq:NN \Typeset \typeset_orig:n
+\pic{set~ triangle~ question/.expand~ once=\l_triangle_tl};
+}
+\ExplSyntaxOff
+
+\begin{document}
+
+\vspace*{\fill}
+
+\section*{Lengths in Right-Angled Triangles}
+
+\vspace*{2cm}
+
+\begin{center}
+\begin{tikzpicture}
+\foreach \x in {1,2,3}
+{
+  \foreach[evaluate=\y as \a using {int(((\y-1)*3+\x)*5)}] \y in {1,2,3}
+  {
+    \pic at (5*\x,-5*\y) {triangle=\a};
+  }
+}
+\end{tikzpicture}
+\end{center}
+
+\vspace*{\fill}
+
+\newpage
+
+\section*{Questions about Right-Angled Triangles}
+
+\begin{tikzpicture}
+\pic at (0,0) {triangle question={25}{\theside}{\theside}{4}};
+\pic at (6,0) {triangle question={30}{\theside}{\theside}{7}};
+\pic at (12,0) {triangle question={5}{\theside}{\theside}{17}};
+
+\pic at (0,-5) {triangle question={55}{\theside}{\theside}{9}};
+\pic at (6,-5) {triangle question={80}{\theside}{\theside}{21}};
+\pic at (12,-5) {triangle question={75}{\theside}{\theside}{13}};
+
+\pic at (0,-10) {triangle question={15}{\theside}{\theside}{3.8}};
+\stepcounter{side}
+\pic at (6,-10) {triangle question={60}{\theside}{\theside}{7.1}};
+\pic at (12,-10) {triangle question={85}{\theside}{\theside}{2.3}};
+
+\pic at (0,-15) {triangle question={20}{2}{\theside}{\theside}};
+\pic at (6,-15) {triangle question={25}{\theside}{8}{\theside}};
+\pic at (12,-15) {triangle question={45}{11}{\theside}{\theside}};
+
+\setcounter{side}{1}
+
+\pic at (0,-20) {triangle question={55}{\theside}{2.3}{\theside}};
+\pic at (6,-20) {triangle question={65}{\theside}{3.8}{\theside}};
+\pic at (12,-20) {triangle question={80}{1.1}{\theside}{\theside}};
+
+
+\end{tikzpicture}
+
+\newpage
+\section*{Answers about Right-Angled Triangles}
+
+\begin{tikzpicture}[solve triangle=true]
+\setcounter{side}{1}
+\setcounter{qn}{1}
+\pic at (0,0) {triangle question={25}{\theside}{\theside}{4}};
+\pic at (6,0) {triangle question={30}{\theside}{\theside}{7}};
+\pic at (12,0) {triangle question={5}{\theside}{\theside}{17}};
+
+\pic at (0,-5) {triangle question={55}{\theside}{\theside}{9}};
+\pic at (6,-5) {triangle question={80}{\theside}{\theside}{21}};
+\pic at (12,-5) {triangle question={75}{\theside}{\theside}{13}};
+
+\pic at (0,-10) {triangle question={15}{\theside}{\theside}{3.8}};
+\stepcounter{side}
+\pic at (6,-10) {triangle question={60}{\theside}{\theside}{7.1}};
+\pic at (12,-10) {triangle question={85}{\theside}{\theside}{2.3}};
+
+\pic at (0,-15) {triangle question={20}{2}{\theside}{\theside}};
+\pic at (6,-15) {triangle question={25}{\theside}{8}{\theside}};
+\pic at (12,-15) {triangle question={45}{11}{\theside}{\theside}};
+
+\setcounter{side}{1}
+
+\pic at (0,-20) {triangle question={55}{\theside}{2.3}{\theside}};
+\pic at (6,-20) {triangle question={65}{\theside}{3.8}{\theside}};
+\pic at (12,-20) {triangle question={80}{1.1}{\theside}{\theside}};
+\end{tikzpicture}
+
+\newpage
+
+\vspace*{\fill}
+
+\section*{Lengths in Right-Angled Triangles: Adjacent}
+\setcounter{qn}{1}
+\vspace*{2cm}
+
+\begin{center}
+\begin{tikzpicture}
+\foreach \y in {1,2,3}
+{
+  \foreach[evaluate=\x as \a using {int(((\y-1)*3+\x)*5)}] \x in {1,2,3}
+  {
+    \pic at (5*\x,-5*\y) {triangle question={\a}{1}{\Typeset{tan(\a)}}{\Typeset{sec(\a)}}};
+  }
+}
+\end{tikzpicture}
+\end{center}
+
+\vspace*{\fill}
+
+\newpage
+
+\vspace*{\fill}
+
+\section*{Lengths in Right-Angled Triangles: Opposite}
+\setcounter{qn}{1}
+\vspace*{2cm}
+
+\begin{center}
+\begin{tikzpicture}
+\foreach \y in {1,2,3}
+{
+  \foreach[evaluate=\x as \a using {int(((\y-1)*3+\x)*5)}] \x in {1,2,3}
+  {
+    \pic at (5*\x,-5*\y) {triangle question={\a}{\Typeset{cot(\a)}}{1}{\Typeset{cosec(\a)}}};
+  }
+}
+\end{tikzpicture}
+\end{center}
+
+\vspace*{\fill}
+
+\newpage
+
+\section*{Questions about Right-Angled Triangles}
+
+\setcounter{qn}{1}
+\setcounter{side}{1}
+\begin{tikzpicture}
+%
+\pgfmathsetmacro\cosx{4*cos(25)}
+\pic at (0,0) {triangle question={\theside}{\Typeset{4*cos(25\degrees)}}{\theside}{4}};
+\pic at (6,0) {triangle question={\theside}{\Typeset{13*cos(15\degrees)}}{\theside}{13}};
+\pic at (12,0) {triangle question={\theside}{\Typeset{6*cos(30\degrees)}}{\theside}{6}};
+
+\pic at (0,-5) {triangle question={\theside}{\Typeset{11*cos(75\degrees)}}{\theside}{11}};
+\pic at (6,-5) {triangle question={\theside}{\Typeset{5*cos(55\degrees)}}{\theside}{5}};
+\pic at (12,-5) {triangle question={\theside}{\theside}{\Typeset{4*sin(85\degrees)}}{4}};
+
+\pic at (0,-10) {triangle question={\theside}{\theside}{\Typeset{3.8*sin(35\degrees)}}{3.8}};
+\stepcounter{side}
+\pic at (6,-10) {triangle question={\theside}{\theside}{\Typeset{3.2*sin(15\degrees)}}{3.2}};
+\pic at (12,-10) {triangle question={\theside}{\theside}{\Typeset{4.1*sin(65\degrees)}}{4.1}};
+
+\pic at (0,-15) {triangle question={\theside}{\Typeset{3*cos(40\degrees)}}{\Typeset{3*sin(40\degrees)}}{\theside}};
+\pic at (6,-15) {triangle question={\theside}{\Typeset{17*cos(5\degrees)}}{\Typeset{17*sin(5\degrees)}}{\theside}};
+\pic at (12,-15) {triangle question={\theside}{\Typeset{2*cos(45\degrees)}}{\Typeset{2*sin(45\degrees)}}{\theside}};
+
+\setcounter{side}{1}
+
+\pic at (0,-20) {triangle question={\theside}{\Typeset{3.2*cos(70\degrees)}}{\theside}{3.2}};
+\pic at (6,-20) {triangle question={\theside}{\theside}{\Typeset{1.3*sin(50\degrees)}}{1.3}};
+\pic at (12,-20) {triangle question={\theside}{\Typeset{2.3*cos(75\degrees)}}{\Typeset{2.3*sin(75\degrees)}}{\theside}};
+
+
+\end{tikzpicture}
+
+\newpage
+
+\section*{Answers}
+
+\setcounter{qn}{1}
+\setcounter{side}{1}
+\begin{tikzpicture}[solve triangle=true]
+%
+\pgfmathsetmacro\cosx{4*cos(25)}
+\pic at (0,0) {triangle question={\theside}{\Typeset{4*cos(25\degrees)}}{\theside}{4}};
+\pic at (6,0) {triangle question={\theside}{\Typeset{13*cos(15\degrees)}}{\theside}{13}};
+\pic at (12,0) {triangle question={\theside}{\Typeset{6*cos(30\degrees)}}{\theside}{6}};
+
+\pic at (0,-5) {triangle question={\theside}{\Typeset{11*cos(75\degrees)}}{\theside}{11}};
+\pic at (6,-5) {triangle question={\theside}{\Typeset{5*cos(55\degrees)}}{\theside}{5}};
+\pic at (12,-5) {triangle question={\theside}{\theside}{\Typeset{4*sin(85\degrees)}}{4}};
+
+\pic at (0,-10) {triangle question={\theside}{\theside}{\Typeset{3.8*sin(35\degrees)}}{3.8}};
+\stepcounter{side}
+\pic at (6,-10) {triangle question={\theside}{\theside}{\Typeset{3.2*sin(15\degrees)}}{3.2}};
+\pic at (12,-10) {triangle question={\theside}{\theside}{\Typeset{4.1*sin(65\degrees)}}{4.1}};
+
+\pic at (0,-15) {triangle question={\theside}{\Typeset{3*cos(40\degrees)}}{\Typeset{3*sin(40\degrees)}}{\theside}};
+\pic at (6,-15) {triangle question={\theside}{\Typeset{17*cos(5\degrees)}}{\Typeset{17*sin(5\degrees)}}{\theside}};
+\pic at (12,-15) {triangle question={\theside}{\Typeset{2*cos(45\degrees)}}{\Typeset{2*sin(45\degrees)}}{\theside}};
+
+\setcounter{side}{1}
+
+\pic at (0,-20) {triangle question={\theside}{\Typeset{3.2*cos(70\degrees)}}{\theside}{3.2}};
+\pic at (6,-20) {triangle question={\theside}{\theside}{\Typeset{1.3*sin(50\degrees)}}{1.3}};
+\pic at (12,-20) {triangle question={\theside}{\Typeset{2.3*cos(75\degrees)}}{\Typeset{2.3*sin(75\degrees)}}{\theside}};
+
+\end{tikzpicture}
+
+
+
+\newpage
+
+\vspace*{\fill}
+
+%\foreach \k in {1,...,3} {
+
+\section*{Lengths in Right-Angled Triangles: General Case}
+\vspace*{1cm}
+
+\begin{center}
+\begin{tikzpicture}
+\let\theqn=\relax
+\pic {triangle question={\theta}{\cos(\theta)}{\sin(\theta)}{1}};
+\pic at (7,0) {triangle question={\theta}{1}{\tan(\theta)}{}};
+\end{tikzpicture}
+\end{center}
+%\vspace*{1cm}
+
+%}
+\vspace*{\fill}
+
+\newpage
+
+\section*{Questions about Right-Angled Triangles}
+
+\setcounter{side}{1}
+\setcounter{qn}{1}
+\begin{tikzpicture}
+\pic at (0,0) {triangle question={32}{\theside}{\theside}{3}};
+\pic at (6,0) {triangle question={14}{\theside}{\theside}{9}};
+\pic at (12,0) {triangle question={74}{\theside}{\theside}{13}};
+
+\pic at (0,-5) {triangle question={43}{\theside}{\theside}{7}};
+\pic at (6,-5) {triangle question={47}{\theside}{\theside}{7}};
+\pic at (12,-5) {triangle question={3}{\theside}{\theside}{11}};
+
+\pic at (0,-10) {triangle question={17}{\theside}{\theside}{2.8}};
+\stepcounter{side}
+\pic at (6,-10) {triangle question={73}{\theside}{\theside}{2.8}};
+\pic at (12,-10) {triangle question={22}{\theside}{\theside}{7.3}};
+
+\pic at (0,-15) {triangle question={24}{5}{\theside}{\theside}};
+\pic at (6,-15) {triangle question={52}{\theside}{3}{\theside}};
+\pic at (12,-15) {triangle question={54}{21}{\theside}{\theside}};
+
+\setcounter{side}{1}
+
+\pic at (0,-20) {triangle question={32}{\theside}{6.3}{\theside}};
+\pic at (6,-20) {triangle question={81}{\theside}{8.3}{\theside}};
+\pic at (12,-20) {triangle question={16}{1.7}{\theside}{\theside}};
+
+
+\end{tikzpicture}
+
+\newpage
+\section*{Answers}
+
+\setcounter{side}{1}
+\setcounter{qn}{1}
+\begin{tikzpicture}[solve triangle=true, triangle precision=full]
+\pic at (0,0) {triangle question={32}{\theside}{\theside}{3}};
+\pic at (6,0) {triangle question={14}{\theside}{\theside}{9}};
+\pic at (12,0) {triangle question={74}{\theside}{\theside}{13}};
+
+\pic at (0,-5) {triangle question={43}{\theside}{\theside}{7}};
+\pic at (6,-5) {triangle question={47}{\theside}{\theside}{7}};
+\pic at (12,-5) {triangle question={3}{\theside}{\theside}{11}};
+
+\pic at (0,-10) {triangle question={17}{\theside}{\theside}{2.8}};
+\stepcounter{side}
+\pic at (6,-10) {triangle question={73}{\theside}{\theside}{2.8}};
+\pic at (12,-10) {triangle question={22}{\theside}{\theside}{7.3}};
+
+\pic at (0,-15) {triangle question={24}{5}{\theside}{\theside}};
+\pic at (6,-15) {triangle question={52}{\theside}{3}{\theside}};
+\pic at (12,-15) {triangle question={54}{21}{\theside}{\theside}};
+
+\setcounter{side}{1}
+
+\pic at (0,-20) {triangle question={32}{\theside}{6.3}{\theside}};
+\pic at (6,-20) {triangle question={81}{\theside}{8.3}{\theside}};
+\pic at (12,-20) {triangle question={16}{1.7}{\theside}{\theside}};
+
+
+\end{tikzpicture}
+
+\newpage
+
+\section*{More Questions about Right-Angled Triangles}
+
+\setcounter{side}{1}
+\setcounter{qn}{1}
+\begin{tikzpicture}
+\pic at (0,0) {triangle question={32}{\theside}{\theside}{3}};
+\pic at (6,0) {triangle question={14}{\theside}{\theside}{9}};
+\pic at (12,0) {triangle question={74}{\theside}{\theside}{13}};
+
+\pic at (0,-5) {triangle question={43}{\theside}{\theside}{7}};
+\pic at (6,-5) {triangle question={47}{\theside}{\theside}{7}};
+\pic at (12,-5) {triangle question={3}{\theside}{\theside}{11}};
+
+\pic at (0,-10) {triangle question={17}{\theside}{\theside}{2.8}};
+\stepcounter{side}
+\pic at (6,-10) {triangle question={73}{\theside}{\theside}{2.8}};
+\pic at (12,-10) {triangle question={22}{\theside}{\theside}{7.3}};
+
+\pic at (0,-15) {triangle question={24}{5}{\theside}{\theside}};
+\pic at (6,-15) {triangle question={52}{\theside}{3}{\theside}};
+\pic at (12,-15) {triangle question={54}{21}{\theside}{\theside}};
+
+\setcounter{side}{1}
+
+\pic at (0,-20) {triangle question={32}{\theside}{6.3}{\theside}};
+\pic at (6,-20) {triangle question={81}{\theside}{8.3}{\theside}};
+\pic at (12,-20) {triangle question={16}{1.7}{\theside}{\theside}};
+
+
+\end{tikzpicture}
+
+\newpage
+
+\vspace*{\fill}
+
+%\foreach \k in {1,...,3} {
+
+\section*{Lengths in Right-Angled Triangles: Inverses}
+\vspace*{1cm}
+
+\begin{center}
+\begin{tikzpicture}
+\let\theqn=\relax
+\pic {triangle question={\theta}{x}{y}{1}};
+  \pic at (7,0) {triangle question={\theta}{1}{t}{}};
+  \node at (2,-1) {\(\theta = \cos^{-1}(x) = \sin^{-1}(y)\)};
+  \node at (9,-1) {\(\theta = \tan^{-1}(t)\)};
+\end{tikzpicture}
+\end{center}
+%\vspace*{1cm}
+
+%}
+\vspace*{\fill}
+
+\newpage
+
+\section*{Questions about Right-Angled Triangles}
+
+\setcounter{side}{1}
+\setcounter{qn}{1}
+\begin{tikzpicture}
+\pic at (0,0) {triangle question={\theside}{\theside}{4}{8}};
+\pic at (6,0) {triangle question={\theside}{\theside}{2}{7}};
+\pic at (12,0) {triangle question={\theside}{\theside}{12}{13}};
+
+\pic at (0,-5) {triangle question={\theside}{3}{\theside}{8}};
+\pic at (6,-5) {triangle question={\theside}{4}{\theside}{7}};
+\pic at (12,-5) {triangle question={\theside}{2}{\theside}{11}};
+
+\pic at (0,-10) {triangle question={\theside}{\theside}{2.8}{3.9}};
+\stepcounter{side}
+\pic at (6,-10) {triangle question={\theside}{2.8}{\theside}{3.9}};
+\pic at (12,-10) {triangle question={\theside}{\theside}{7.3}{12.8}};
+
+\pic at (0,-15) {triangle question={\theside}{\theside}{3.2}{7.8}};
+\pic at (6,-15) {triangle question={\theside}{3}{\theside}{5}};
+\pic at (12,-15) {triangle question={\theside}{5}{\theside}{13}};
+
+\setcounter{side}{1}
+
+\pic at (0,-20) {triangle question={\theside}{2.3}{5.2}{\theside}};
+\pic at (6,-20) {triangle question={\theside}{8.3}{7.5}{\theside}};
+\pic at (12,-20) {triangle question={\theside}{1.2}{2.4}{\theside}};
+
+
+\end{tikzpicture}
+\newpage
+
+\section*{Answers}
+
+\setcounter{side}{1}
+\setcounter{qn}{1}
+\begin{tikzpicture}[solve triangle=true, triangle precision=full]
+\pic at (0,0) {triangle question={\theside}{\theside}{4}{8}};
+\pic at (6,0) {triangle question={\theside}{\theside}{2}{7}};
+\pic at (12,0) {triangle question={\theside}{\theside}{12}{13}};
+
+\pic at (0,-5) {triangle question={\theside}{3}{\theside}{8}};
+\pic at (6,-5) {triangle question={\theside}{4}{\theside}{7}};
+\pic at (12,-5) {triangle question={\theside}{2}{\theside}{11}};
+
+\pic at (0,-10) {triangle question={\theside}{\theside}{2.8}{3.9}};
+\stepcounter{side}
+\pic at (6,-10) {triangle question={\theside}{2.8}{\theside}{3.9}};
+\pic at (12,-10) {triangle question={\theside}{\theside}{7.3}{12.8}};
+
+\pic at (0,-15) {triangle question={\theside}{\theside}{3.2}{7.8}};
+\pic at (6,-15) {triangle question={\theside}{3}{\theside}{5}};
+\pic at (12,-15) {triangle question={\theside}{5}{\theside}{13}};
+
+\setcounter{side}{1}
+
+\pic at (0,-20) {triangle question={\theside}{2.3}{5.2}{\theside}};
+\pic at (6,-20) {triangle question={\theside}{8.3}{7.5}{\theside}};
+\pic at (12,-20) {triangle question={\theside}{1.2}{2.4}{\theside}};
+
+
+\end{tikzpicture}
+
+\newpage
+
+\section*{Questions about Right-Angled Triangles}
+
+Find all mising values, leave all your answers correct to \(3\) s.f.
+
+\setcounter{side}{1}
+\setcounter{qn}{1}
+\begin{tikzpicture}
+\pic at (0,0) {triangle question={43}{\theside}{\theside}{7.3}};
+\pic at (6,0) {triangle question={67}{\theside}{\theside}{2.5}};
+\pic at (12,0) {triangle question={13}{\theside}{\theside}{5.1}};
+
+\pic at (0,-5) {triangle question={34}{5.6}{\theside}{\theside}};
+\pic at (6,-5) {triangle question={62}{\theside}{3.7}{\theside}};
+\pic at (12,-5) {triangle question={81}{4.3}{\theside}{\theside}};
+
+\pic at (0,-10) {triangle question={\theside}{\theside}{5}{7}};
+\stepcounter{side}
+\pic at (6,-10) {triangle question={\theside}{\theside}{7}{15}};
+\pic at (12,-10) {triangle question={\theside}{\theside}{3}{8}};
+
+
+
+\end{tikzpicture}
+\newpage
+
+\section*{Answers to Questions about Right-Angled Triangles}
+
+Find all mising values, leave all your answers correct to \(3\) s.f.
+
+\setcounter{side}{1}
+\setcounter{qn}{1}
+\begin{tikzpicture}[solve triangle=true, triangle precision=full]
+\pic at (0,0) {triangle question={43}{\theside}{\theside}{7.3}};
+\pic at (6,0) {triangle question={67}{\theside}{\theside}{2.5}};
+\pic at (12,0) {triangle question={13}{\theside}{\theside}{5.1}};
+
+\pic at (0,-5) {triangle question={34}{5.6}{\theside}{\theside}};
+\pic at (6,-5) {triangle question={62}{\theside}{3.7}{\theside}};
+\pic at (12,-5) {triangle question={81}{4.3}{\theside}{\theside}};
+
+\pic at (0,-10) {triangle question={\theside}{\theside}{5}{7}};
+\stepcounter{side}
+\pic at (6,-10) {triangle question={\theside}{\theside}{7}{15}};
+\pic at (12,-10) {triangle question={\theside}{\theside}{3}{8}};
+
+
+
+\end{tikzpicture}
+
+
+
+
+\end{document}
